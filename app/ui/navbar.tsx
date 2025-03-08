@@ -32,7 +32,7 @@ export default function Navbar() {
                                 type="button"
                                 className="mr-2 text-black bg-slate-200 hover:bg-slate-300 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-slate-200 dark:hover:bg-slate-300 dark:focus:ring-slate-300">Logout</button>
                                 </Link>)}
-                    <Link href="/projects">
+                    <Link href="/studio">
                         <button
                             type="button"
                             className="mr-2 text-black bg-slate-200 hover:bg-slate-300 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-slate-200 dark:hover:bg-slate-300 dark:focus:ring-slate-300">Studio</button>
