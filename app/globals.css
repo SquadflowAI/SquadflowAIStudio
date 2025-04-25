@@ -2,25 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+
+/* .body {
+  overflow-x: hidden;
+} */
+
+.home-page-body {
+ margin-top: 70px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* .dndflow {
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.dndflow {
   flex-direction: column;
   display: flex;
   flex-grow: 1;
@@ -65,4 +72,43 @@ body {
 
 .dndflow .selectall {
   margin-top: 10px;
-} */
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  .dndflow aside {
+    width: 20%;
+    max-width: 250px;
+  }
+}
+
+.sideBar {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 1;
+  width: 200px;
+  padding: 10px;
+}
+
+.sideBarItem {
+  border: 1px solid #000;
+  border-radius: 3px;
+  height: 30px;
+  padding: 10px;
+  margin-top: 10px;
+  background: #ccc;
+}
+
+.page {
+  /* flex: 1 1 auto; */
+  background-color: white;
+  /* margin: 20px; */
+  border-radius: 5px;
+  padding: 5px;
+  border: 1px solid rgb(237, 237, 237);
+
+}
+

@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { ReactFlow,
+import {
+  ReactFlow,
   ReactFlowProvider,
   addEdge,
   useNodesState,
@@ -9,22 +10,34 @@ import { ReactFlow,
   Controls,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+
 // import { ActionWorkflowConnectionDto, ActionWorkflowNodeDto, ActionWrokflowDto } from '../dtos/action-workflow-dto';
 // import { EntityDto } from '../dtos/entity-dto';
 // import { createActionWorkflow, getActions, updateActionWorkflow } from '../lib/api.actions';
 // import { getEntities } from '../lib/api.entities';
-// import shortid from "shortid";
+import shortid from "shortid";
+import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../dtos/ui-flow-dto';
+import { createUIFlow, getAllUIFlows } from '../api/api.uiflow';
+import { getAllTools } from '../api/api.tools';
+import { getAllAgents } from '../api/api.agents';
+import CreateFlowModal from './create-flow-modal';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
 
+// const initialNodes = [
+//   {
+//     id: '1',
+//     type: 'input',
+//     data: { label: 'Data Input' },
+//     position: { x: 365.8773193359375, y: -84.99768447875977 },
+//   },
+// ];
+
 const initialNodes = [
-  {
-    id: '1',
-    type: 'input',
-    data: { label: 'Data Input' },
-    position: { x: 365.8773193359375, y: -84.99768447875977 },
-  },
+  { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+  { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
 ];
+const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
 const PROPERTIES = "PROPERTIES"
 const AICHAT = "AICHAT"
@@ -32,22 +45,34 @@ const DATAINPUT = 'Data Input';
 const SAVEINDB = 'Save in DB';
 const OPENPAGE = 'Open Page';
 
-const DnDFlow = () => {
+const Studio = () => {
   const reactFlowWrapper = useRef(null);
+  // const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const [toogleActions, setToogleActions] = useState("1");
-  const [toogleProperties, setToogleProperties] = useState(PROPERTIES);
-  const [actions, setActions] = useState([]);
-  const [action, setAction] = useState(null);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [entities, setEntities] = useState([]);
-  const [selectedEntityOption, setSelectedEntityOption] = useState(null);
-  const [selectedPageRoute, setSelectedPageRoute] = useState(null);
-  const [actionName, setActionName] = useState('');
-  const [routes, setRoutes] = useState([]);
+  const [_toogleActions, setToogleActions] = useState("Agents");
+  const [_toogleProperties, setToogleProperties] = useState(PROPERTIES);
+  const [_actions, setActions] = useState([]);
+  const [_action, setAction] = useState(null);
+  const [_selectedNode, setSelectedNode] = useState(null);
+  const [_entities, setEntities] = useState([]);
+  // const [_selectedEntityOption, setSelectedEntityOption] = useState(null);
+  // const [_selectedPageRoute, setSelectedPageRoute] = useState(null);
+  const [_selectedFlow, setSelectedFlow] = useState(null);
+  const [_actionName, setActionName] = useState('');
+  const [_routes, setRoutes] = useState([]);
+  const [_tools, setTools] = useState(null);
+  const [_agents, setAgents] = useState(null);
+  const [_uiFlows, setUiFlows] = useState([]);
   //const [orderNumber, setOrderNumber] = useState(0);
+
+  const [showPage, setShowPage] = useState(false);
+  const closeModal = () => setShowPage(false);
+
   let ordNubmer = 0;
   const getOrderNumber = () => {
     //ordNubmer++
@@ -55,42 +80,75 @@ const DnDFlow = () => {
     return ordNubmer++;
   };
 
-//   useEffect(() => {
-//     async function fetchActions() {
-//       try {
-//         const response = await getActions();
-//         setActions(response);
-//       } catch (error) {
-//       } finally {
-//       }
-//     }
-//     fetchActions();
-//   }, []);
+  const openCreateUIFlow = () => {
+    setShowPage(true)
+  }
 
-//   useEffect(() => {
-//     async function fetchRoutes() {
-//       try {
-//         const response = await getAvailableRoutes();
-//         setRoutes(response);
-//       } catch (error) {
-//       } finally {
-//       }
-//     }
-//     fetchRoutes();
-//   }, []);
+  useEffect(() => {
+    async function getUIOrchestrations() {
+      try {
+        const response = await getAllUIFlows();
+        setUiFlows(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getUIOrchestrations();
+  }, []);
 
-//   async function fetchEntities() {
-//     try {
-//       const response = await getEntities();
-//       setEntities(response);
-//     } catch (error) {
-//     } finally {
-//     }
-//   }
+  useEffect(() => {
+    async function getTools() {
+      try {
+        const response = await getAllTools();
+        setTools(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getTools();
+  }, []);
+
+  useEffect(() => {
+    async function getAgents() {
+      try {
+        const response = await getAllAgents();
+        setAgents(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getAgents();
+  }, []);
+
+  //   useEffect(() => {
+  //     async function fetchRoutes() {
+  //       try {
+  //         const response = await getAvailableRoutes();
+  //         setRoutes(response);
+  //       } catch (error) {
+  //       } finally {
+  //       }
+  //     }
+  //     fetchRoutes();
+  //   }, []);
+
+  //   async function fetchEntities() {
+  //     try {
+  //       const response = await getEntities();
+  //       setEntities(response);
+  //     } catch (error) {
+  //     } finally {
+  //     }
+  //   }
+
+  // const onConnect = useCallback(
+  //   (params) => setEdges((eds) => addEdge(params, eds)),
+  //   [],
+  // );
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
-    [],
+    [setEdges],
   );
 
   const onDragOver = useCallback((event) => {
@@ -114,7 +172,7 @@ const DnDFlow = () => {
         y: event.clientY,
       });
       const newNode = {
-        id: 1,//shortid.generate(),
+        id: shortid.generate(),
         orderNumber: getOrderNumber(),
         type,
         position,
@@ -149,166 +207,192 @@ const DnDFlow = () => {
     //   }
     // }
 
-   // fetchEntities();
+    // fetchEntities();
   }, []);
 
-//   const setSelectedAction = (action) => {
-//     setNodes([]);
-//     setEdges([]);
-//     setActionName(action?.name);
-//     setAction(action);
-//     if (!reactFlowInstance) return;  // Ensure ReactFlow instance is ready
-//     console.log(action)
-//     // Step 1: Add all nodes from action.nodes array
-//     const newNodes = action.nodes.map((apiNode) => ({
-//       id: apiNode.nodeId,  // Use nodeId from the API data
-//       orderNumber: apiNode.orderNumber,
-//       type: apiNode.type || 'default',  // Use the node type or default to 'default'
-//       position: reactFlowInstance.project({ x: apiNode.positionX, y: apiNode.positionY }),  // Position from API
-//       data: { label: apiNode.type },  // Label from API or fallback
-//       databaseEntityInput: apiNode.databaseEntityInput,
-//       databaseEntityOutput: apiNode.databaseEntityOutput,
-//     }));
+  const saveWorkflow = () => {
+    if (!_selectedFlow) {
+      return;
+    }
+    //_selectedOrchestration.name = _actionName;
+    _selectedFlow.nodes = [];
+    _selectedFlow.connections = [];
+    nodes.forEach(element => {
+      let node = new UIAgentNodeDto();
+      node.id = element.id, //shortid.generate(),
+        node.positionX = element.position.x;
+      node.positionY = element.position.y;
 
-//     // Step 2: Update the nodes state by concatenating the new nodes from API
-//     setNodes((nds) => nds.concat(newNodes));
-//     console.log(nodes)
+      _selectedFlow.nodes.push(node);
+    });
+    edges.forEach(element => {
+      let edge = new UIAgentNodeConnectionDto();
+      edge.sourceNodeId = element.source;
+      edge.targetNodeId = element.target;
 
-//     // Step 3: Add all edges from action.connections array
-//     const newEdges = action.connections.map((connection) => ({
-//       id: `edge-${connection.sourceNodeId}-${connection.targetNodeId}`,  // Unique ID for the edge
-//       source: connection.sourceNodeId,  // Source node ID from API
-//       target: connection.targetNodeId,  // Target node ID from API
-//       // type: 'smoothstep',  // Customize edge type if needed
-//     }));
+      _selectedFlow.connections.push(edge);
+    });
 
-//     // Step 4: Update the edges state by concatenating the new edges from API
-//     setEdges((eds) => eds.concat(newEdges));
+    console.log(_selectedFlow)
+    createUIFlow(_selectedFlow);
+    if (_action) {
 
-//   }
-
-//   const saveWorkflow = () => {
-//     let workflow = new ActionWrokflowDto();
-//     workflow.name = actionName;
-//     workflow.nodes = [];
-//     workflow.connections = [];
-//     nodes.forEach(element => {
-//       let node = new ActionWorkflowNodeDto();
-//       node.nodeId = element.id;
-//       node.orderNumber = element.orderNumber,
-//       node.type = element.type;
-//       node.positionX = element.position.x;
-//       node.positionY = element.position.y;
-//       node.databaseEntityInput = element.databaseEntityInput;
-//       if(element.inMemoryEntityOutputData?.routeName){
-//         node.inMemoryEntityOutputData = element.inMemoryEntityOutputData.routeName;
-//       }
-      
-//       workflow.nodes.push(node);
-//     });
-//     edges.forEach(element => {
-//       let edge = new ActionWorkflowConnectionDto();
-//       edge.sourceNodeId = element.source;
-//       edge.targetNodeId = element.target;
-//       workflow.connections.push(edge);
-//     });
-
-//     console.log(workflow)
-
-//     if (action) {
-//       workflow.id = action.id;
-//       updateActionWorkflow(workflow);
-//     } else {
-//       createActionWorkflow(workflow);
-//     }
-//   }
+    } else {
+      //  
+    }
+  }
 
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
-//   const handleChangeForSelectEntity = (event) => {
-//     setSelectedEntityOption(event.target.value);
-//     const updatedNodes = nodes.map(node => {
-//       if (node.type === selectedNode?.type) {
-//         return {
-//           ...node,
-//           databaseEntityInput: {
-//             ...node.databaseEntityInput,
-//             name: event.target.value,
-//           },
-//         };
-//       }
-//       return node;
-//     });
-//     setNodes(updatedNodes);
-//   };
+  const selectFlow = (flow) => {
+    setNodes([]);
+    setEdges([]);
 
-//   const handleChangeForSelectedPageRoute = (event) => {
-//     setSelectedPageRoute(event.target.value);
-//     const updatedNodes = nodes.map(node => {
-//       if (node.type === selectedNode?.type) {
-//         return {
-//           ...node,
-//           inMemoryEntityOutputData: {
-//             ...node.inMemoryEntityOutputData,
-//             routeName: event.target.value,
-//           },
-//         };
-//       }
-//       return node;
-//     });
-//     console.log(updatedNodes)
-//     setNodes(updatedNodes);
-//   };
+    setSelectedFlow(flow);
+    console.log("1")
+    if (!reactFlowInstance) return;  // Ensure ReactFlow instance is ready
+    console.log("2")
+    const newNodes = flow.nodes.map((apiNode) => ({
+      id: apiNode.nodeId,  // Use nodeId from the API data
+      orderNumber: apiNode.orderNumber,
+      type: apiNode.type || 'default',  // Use the node type or default to 'default'
+      position: reactFlowInstance.project({ x: apiNode.positionX, y: apiNode.positionY }),  // Position from API
+      data: { label: apiNode.type },  // Label from API or fallback
+      // databaseEntityInput: apiNode.databaseEntityInput,
+      // databaseEntityOutput: apiNode.databaseEntityOutput,
+    }));
+
+    // Step 2: Update the nodes state by concatenating the new nodes from API
+    setNodes((nds) => nds.concat(newNodes));
+    console.log(nodes)
+
+    const newEdges = flow.connections.map((connection) => ({
+      id: `edge-${connection.sourceNodeId}-${connection.targetNodeId}`,  // Unique ID for the edge
+      source: connection.sourceNodeId,  // Source node ID from API
+      target: connection.targetNodeId,  // Target node ID from API
+      // type: 'smoothstep',  // Customize edge type if needed
+    }));
+
+    // Step 4: Update the edges state by concatenating the new edges from API
+    setEdges((eds) => eds.concat(newEdges));
+  }
+
+  const createFlow = (name) => {
+
+    let uiflow = new UIFlowDto();
+    uiflow.name = name;
+    uiflow.nodes = [];
+    uiflow.connections = [];
+
+    // pageTemplate.pageName = name;
+
+    _uiFlows.push(uiflow);
+    setSelectedFlow(uiflow);
+
+    // let workflow: SaveUIWrokflowDto = new SaveUIWrokflowDto();
+    // workflow.workflowId = "1";
+
+    // workflow.uIWorkflowJson = JSON.stringify(layout);
+
+    // setDtoTest(workflow);
+  };
+
+  //   const handleChangeForSelectEntity = (event) => {
+  //     setSelectedEntityOption(event.target.value);
+  //     const updatedNodes = nodes.map(node => {
+  //       if (node.type === selectedNode?.type) {
+  //         return {
+  //           ...node,
+  //           databaseEntityInput: {
+  //             ...node.databaseEntityInput,
+  //             name: event.target.value,
+  //           },
+  //         };
+  //       }
+  //       return node;
+  //     });
+  //     setNodes(updatedNodes);
+  //   };
+
+  //   const handleChangeForSelectedPageRoute = (event) => {
+  //     setSelectedPageRoute(event.target.value);
+  //     const updatedNodes = nodes.map(node => {
+  //       if (node.type === selectedNode?.type) {
+  //         return {
+  //           ...node,
+  //           inMemoryEntityOutputData: {
+  //             ...node.inMemoryEntityOutputData,
+  //             routeName: event.target.value,
+  //           },
+  //         };
+  //       }
+  //       return node;
+  //     });
+  //     console.log(updatedNodes)
+  //     setNodes(updatedNodes);
+  //   };
 
 
   return (
     <div className="dndflow flex flex-row">
 
-      <div className='flex flex-col w-1/5 bg-slate-200 p-3'>
-        {/* <div className='flex flex-row'>
+      <div className='flex flex-col w-1/5 bg-slate-100 p-3'>
+        <div className='flex flex-row'>
           <button
-            onClick={() => setToogleActions("1")}
-            className="mr-1 w-1/2 justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm   py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Components
+            onClick={() => setToogleActions("Orchestrations")}
+            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+            Flows
           </button>
-          <button
-            onClick={() => setToogleActions("2")}
-            className="w-1/2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Actions
+        </div>
+        <div className='flex flex-row'>
+        <button
+            onClick={() => setToogleActions("Agents")}
+            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+            Agents
           </button>
-        </div> */}
+        </div>
+        <div className='flex flex-row'>
+        <button
+            onClick={() => setToogleActions("Tools")}
+            className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm   py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+            Tools
+          </button>
+        </div>
+        
+         
         {/* <button onDragStart={(event) => onDragStart(event, 'input')} draggable type="button" className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Navbar</button> */}
-        {toogleActions === "1" &&
+        {_toogleActions === "Agents" &&
           <div className='flex-col flex'>
-            <button onDragStart={(event) => onDragStart(event, 'Data Input')} draggable className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-              Data Input
-            </button>
-            <button onDragStart={(event) => onDragStart(event, 'Api Call')} draggable className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-              Api Call
-            </button>
-            <button onDragStart={(event) => onDragStart(event, 'Response')} draggable className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-              Response
-            </button>
-            <button onDragStart={(event) => onDragStart(event, 'Save in DB')} draggable className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-              Save in DB
-            </button>
-            <button onDragStart={(event) => onDragStart(event, 'Open Page')} draggable className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-              Open Page
-            </button>
-          </div>}
-        {toogleActions === "2" &&
-          <div className='flex-col flex'>
-            {/* {actions.map((action, index) => (
+            {_agents?.map((agent, index) => (
               <div className="flex flex-row">
                 <button type="button"
-                  onClick={() => { setSelectedAction(action) }}
                   className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-                  {action?.name}</button>
+                  {agent?.name}</button>
               </div>
-            ))} */}
+            ))}
+          </div>}
+        {_toogleActions === "Orchestrations" &&
+          <div className='flex-col flex'>
+            {_uiFlows?.map((uiOrchestration, index) => (
+              <div className="flex flex-row">
+                <button type="button" onClick={() => selectFlow(uiOrchestration)}
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {uiOrchestration?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {_toogleActions === "Tools" &&
+          <div className='flex-col flex'>
+            {_tools?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
           </div>}
       </div>
       <div className='flex flex-col w-3/5'>
@@ -332,7 +416,16 @@ const DnDFlow = () => {
 
         </ReactFlowProvider>
       </div>
-      <div className='flex flex-col w-1/5'>
+      <div className='flex flex-col w-1/5 bg-slate-100 p-3'>
+        <button onClick={openCreateUIFlow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+          Create
+        </button>
+        <CreateFlowModal isOpen={showPage}
+          onClose={closeModal}
+          onAddPage={createFlow} ></CreateFlowModal>
+        <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+          Save
+        </button>
         {/* <button onClick={saveWorkflow} className="w-full focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900">Save</button>
         <input
           type="text"
@@ -352,9 +445,9 @@ const DnDFlow = () => {
             className="w-1/2 focus:outline-none text-black bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
             AI Chat
           </button> */}
-        </div>
-        <div>
-          {/* {toogleProperties === PROPERTIES &&
+      </div>
+      <div>
+        {/* {toogleProperties === PROPERTIES &&
             <div>
               <div>Node name: {selectedNode?.type}</div>
               {selectedNode?.type === DATAINPUT &&
@@ -410,12 +503,12 @@ const DnDFlow = () => {
               }
             </div>
           } */}
-          {/* {toogleProperties === AICHAT && <AiChat></AiChat>} */}
-        </div>
-
+        {/* {toogleProperties === AICHAT && <AiChat></AiChat>} */}
       </div>
-     
+
+    </div>
+
   );
 };
 
-export default DnDFlow;
+export default Studio;
