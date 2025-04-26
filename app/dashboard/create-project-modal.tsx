@@ -1,18 +1,18 @@
 
 import React, { useState } from "react";
 
-const CreateFlowModal = ({ isOpen, onClose, onAddPage }) => {
+const CreateProjectModal = ({ isOpen, onClose, onAdd }) => {
     if (!isOpen) return null;
 
-    const [pageName, setPageName] = useState("");
+    const [name, setName] = useState("");
 
-    const handlePageInputChange = (e) => {
-        setPageName(e.target.value);
+    const handleInputChange = (e) => {
+        setName(e.target.value);
     };
 
-    const handleAddPage = () => {
-        onAddPage(pageName); // Send the input name to the parent component
-        setPageName("");
+    const handleAdd = () => {
+        onAdd(name); // Send the input name to the parent component
+        setName("");
         onClose(); // Close the modal after adding
     }
 
@@ -55,8 +55,8 @@ const CreateFlowModal = ({ isOpen, onClose, onAddPage }) => {
                         </div>
                         <div className="p-4 md:p-5 space-y-4">
                             <input
-                                value={pageName}
-                                onChange={handlePageInputChange}
+                                value={name}
+                                onChange={handleInputChange}
                                 type="text"
                                 placeholder="Name"
                                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -68,7 +68,7 @@ const CreateFlowModal = ({ isOpen, onClose, onAddPage }) => {
                             <button
                                 data-modal-hide="default-modal"
                                 type="button"
-                                onClick={handleAddPage}
+                                onClick={handleAdd}
                                 className="ml-auto text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                             >
                                 Create
@@ -87,4 +87,4 @@ const CreateFlowModal = ({ isOpen, onClose, onAddPage }) => {
         </div>
     );
 };
-export default CreateFlowModal;
+export default CreateProjectModal;
