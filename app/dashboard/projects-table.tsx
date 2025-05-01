@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createProjectAPI, getAllProjectsAPI } from "../api/api.projects";
-import { getAllUIFlows } from "../api/api.uiflow";
+import { getAllUIFlowsAPI } from "../api/api.uiflow";
 import { ProjectDto } from "../dtos/project-dto";
 import CreateProjectModal from "./create-project-modal";
 

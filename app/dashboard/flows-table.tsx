@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllUIFlows } from "../api/api.uiflow";
+import { getAllUIFlowsAPI } from "../api/api.uiflow";
 
 export default function FlowsTable() {
     const [_flows, setFlows] = useState([]);
@@ -7,7 +7,7 @@ export default function FlowsTable() {
     useEffect(() => {
         async function getUIFlows() {
             try {
-                const response = await getAllUIFlows();
+                const response = await getAllUIFlowsAPI();
                 setFlows(response);
             } catch (error) {
                 console.log(error)

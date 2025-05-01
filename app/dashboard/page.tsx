@@ -7,6 +7,7 @@ import { useRouter } from "@/node_modules/next/navigation";
 //import { useRouter } from "@/node_modules/next/router";
 // Import useRouter for navigation
 import { useEffect, useState } from "react";
+import withAuth from "../contexts/WithAuth";
 import Studio from "../studio/page";
 import FlowsTable from "./flows-table";
 import ProjectsTable from "./projects-table";
@@ -196,4 +197,4 @@ const Dashboard = () => {
     );
 }
 
-export default Dashboard;
+export default withAuth(Dashboard);

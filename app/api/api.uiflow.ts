@@ -1,6 +1,6 @@
 import { UIFlowDto } from "../dtos/ui-flow-dto";
 
-export async function createUIFlow(uiFlow: UIFlowDto) {
+export async function createUIFlowAPI(uiFlow: UIFlowDto) {
  
     const response = await fetch('https://localhost:49163/api/UIFlow/create', {
       method: 'POST',
@@ -14,7 +14,7 @@ export async function createUIFlow(uiFlow: UIFlowDto) {
 
 }
 
-export async function getUIFlow(name: string): Promise<UIFlowDto> {
+export async function getUIFlowAPI(name: string): Promise<UIFlowDto> {
     const response = await fetch(`https://localhost:49163/api/UIFlow/${name}`,
     { cache: 'no-store' });
   
@@ -26,7 +26,7 @@ export async function getUIFlow(name: string): Promise<UIFlowDto> {
     return data;
   }
 
-  export async function getAllUIFlows(): Promise<UIFlowDto[]> {
+  export async function getAllUIFlowsAPI(): Promise<UIFlowDto[]> {
     const response = await fetch(`https://localhost:49163/api/UIFlow/all`,
     { cache: 'no-store' });
   

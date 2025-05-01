@@ -17,9 +17,9 @@ import '@xyflow/react/dist/style.css';
 // import { getEntities } from '../lib/api.entities';
 import shortid from "shortid";
 import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../dtos/ui-flow-dto';
-import { createUIFlow, getAllUIFlows } from '../api/api.uiflow';
-import { getAllTools } from '../api/api.tools';
-import { getAllAgents } from '../api/api.agents';
+import { createUIFlowAPI, getAllUIFlowsAPI } from '../api/api.uiflow';
+import { getAllToolsAPI } from '../api/api.tools';
+import { getAllAgentsAPI } from '../api/api.agents';
 import CreateFlowModal from './create-flow-modal';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
@@ -87,7 +87,7 @@ const Studio = () => {
   useEffect(() => {
     async function getUIOrchestrations() {
       try {
-        const response = await getAllUIFlows();
+        const response = await getAllUIFlowsAPI();
         setUiFlows(response);
       } catch (error) {
       } finally {
@@ -99,7 +99,7 @@ const Studio = () => {
   useEffect(() => {
     async function getTools() {
       try {
-        const response = await getAllTools();
+        const response = await getAllToolsAPI();
         setTools(response);
       } catch (error) {
       } finally {
@@ -111,7 +111,7 @@ const Studio = () => {
   useEffect(() => {
     async function getAgents() {
       try {
-        const response = await getAllAgents();
+        const response = await getAllAgentsAPI();
         setAgents(response);
       } catch (error) {
       } finally {
@@ -234,7 +234,7 @@ const Studio = () => {
     });
 
     console.log(_selectedFlow)
-    createUIFlow(_selectedFlow);
+    createUIFlowAPI(_selectedFlow);
     if (_action) {
 
     } else {
