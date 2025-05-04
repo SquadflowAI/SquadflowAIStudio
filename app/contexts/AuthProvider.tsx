@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from "@/node_modules/next/navigation";
+import { useDataContext } from './DataContext';
 
 const AuthContext = createContext<any | undefined>(undefined);
 
@@ -8,6 +9,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const authStatus = !!localStorage.getItem('token');
@@ -31,12 +33,11 @@ export function AuthProvider({ children }) {
     };
 
     const authProviderLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('userId');
+        localStorage.clear();
         setUser(null);
         setIsAuthenticated(false);
-
         router.push('/login');
     };
 

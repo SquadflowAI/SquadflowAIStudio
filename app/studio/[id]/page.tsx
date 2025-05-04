@@ -10,17 +10,20 @@ import {
   Controls,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+ 
+
+import { useParams } from 'next/navigation';
 
 // import { ActionWorkflowConnectionDto, ActionWorkflowNodeDto, ActionWrokflowDto } from '../dtos/action-workflow-dto';
 // import { EntityDto } from '../dtos/entity-dto';
 // import { createActionWorkflow, getActions, updateActionWorkflow } from '../lib/api.actions';
 // import { getEntities } from '../lib/api.entities';
 import shortid from "shortid";
-import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../dtos/ui-flow-dto';
-import { createUIFlowAPI, getAllUIFlowsAPI } from '../api/api.uiflow';
-import { getAllToolsAPI } from '../api/api.tools';
-import { getAllAgentsAPI } from '../api/api.agents';
-import CreateFlowModal from './create-flow-modal';
+import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../../dtos/ui-flow-dto';
+import { createUIFlowAPI, getAllUIFlowsAPI } from '../../api/api.uiflow';
+import { getAllToolsAPI } from '../../api/api.tools';
+import { getAllAgentsAPI } from '../../api/api.agents';
+import CreateFlowModal from '../create-flow-modal';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
 
@@ -46,6 +49,8 @@ const SAVEINDB = 'Save in DB';
 const OPENPAGE = 'Open Page';
 
 const Studio = () => {
+  const params = useParams();
+
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState([]);
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -338,7 +343,6 @@ const Studio = () => {
 
   return (
     <div className="dndflow flex flex-row">
-
       <div className='flex flex-col w-1/5 bg-slate-100 p-3'>
         <div className='flex flex-row'>
           <button

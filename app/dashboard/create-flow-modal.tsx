@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 
-const CreateProjectModal = ({ isOpen, onClose, onAdd }) => {
+const CreateFlowModal = ({ isOpen, onClose, onAdd }) => {
     if (!isOpen) return null;
 
     const [name, setName] = useState("");
@@ -27,7 +27,7 @@ const CreateProjectModal = ({ isOpen, onClose, onAdd }) => {
                     <div className="relative bg-slate-200 rounded-lg shadow dark:bg-gray-700">
                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                Create new Project
+                                Create new Flow
                             </h3>
                             <button
                                 type="button"
@@ -87,4 +87,4 @@ const CreateProjectModal = ({ isOpen, onClose, onAdd }) => {
         </div>
     );
 };
-export default CreateProjectModal;
+export default CreateFlowModal;

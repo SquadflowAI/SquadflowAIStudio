@@ -37,3 +37,15 @@ export async function getUIFlowAPI(name: string): Promise<UIFlowDto> {
     const data = await response.json();
     return data;
   }
+
+  export async function getUIFlowsByProjectIdAPI(projectId: string): Promise<UIFlowDto[]> {
+    const response = await fetch(`https://localhost:49163/api/UIFlow/all/${projectId}`,
+    { cache: 'no-store' });
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+  
+    const data = await response.json();
+    return data;
+  }

@@ -1,5 +1,6 @@
 export class UIFlowDto {
     public id: string;
+    public projectId: string;
     public name: string;
     public nodes: UIAgentNodeDto[];
     public connections: UIAgentNodeConnectionDto[];

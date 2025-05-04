@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { createProjectAPI, getAllProjectsAPI } from "../api/api.projects";
+import { createProjectAPI, getAllProjectsAPI, getAllProjectsByUserIdAPI } from "../api/api.projects";
 import { getAllUIFlowsAPI } from "../api/api.uiflow";
+import { useAuth } from "../contexts/AuthProvider";
+import { useDataContext } from "../contexts/DataContext";
 import { ProjectDto } from "../dtos/project-dto";
 import CreateProjectModal from "./create-project-modal";
 
@@ -8,15 +10,18 @@ export default function ProjectsTable() {
     const [_projects, setProjects] = useState([]);
     const [showCreateProject, setShowCreateProject] = useState(false);
     const closeModal = () => setShowCreateProject(false);
-  
+    const { user } = useAuth();
+    const { projectInMemory, setProjectInMemory } = useDataContext();
+
+
     const openCreateProject = () => {
-      setShowCreateProject(true)
+        setShowCreateProject(true)
     }
 
     useEffect(() => {
         async function getProjects() {
             try {
-                const response = await getAllProjectsAPI();
+                const response = await getAllProjectsByUserIdAPI(user.userId);
                 setProjects(response);
             } catch (error) {
                 console.log(error)
@@ -29,13 +34,19 @@ export default function ProjectsTable() {
     const createProject = (name) => {
 
         let project = new ProjectDto();
+        project.userId = user.userId;
         project.name = name;
 
         _projects.push(project);
-    
+
         createProjectAPI(project);
-      };
-    
+    };
+
+    const selectProject = (project) => {
+        setProjectInMemory(project)
+        console.log(project)
+    }
+
 
     return (
         <div className="p-4 sm:ml-64">
@@ -71,12 +82,18 @@ export default function ProjectsTable() {
                         </thead>
                         <tbody>
                             {_projects.map((row) => (
-                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                                <tr onClick={() => selectProject(row)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         {row.id}
                                     </th>
                                     <td className="px-6 py-4">
-                                        {row.name}
+                                        {projectInMemory?.id === row.id ? (
+                                            <span className="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 rounded-full dark:bg-blue-900 dark:text-blue-300">
+                                                {row.name}
+                                            </span>
+                                        ) : (
+                                            <span>{row.name}</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         {row.createdDate}
