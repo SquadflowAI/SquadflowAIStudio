@@ -6,6 +6,7 @@ import "./globals.css";
 import { inter } from '@/app/ui/fonts';
 import { AuthProvider } from "./contexts/AuthProvider";
 import { DataProvider } from "./contexts/DataContext";
+import FlowbiteInit from "./FlowbiteInit";
 
 export default function RootLayout({
   children,
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
           <DataProvider>
+          <FlowbiteInit />
             {children}
           </DataProvider>
         </AuthProvider>
