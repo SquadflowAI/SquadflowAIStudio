@@ -126,6 +126,18 @@ const Studio = () => {
     getAgents();
   }, []);
 
+  useEffect(() => {
+    async function getFlowDetails() {
+      try {
+        const response = await getAllAgentsAPI();
+        console.log(response)
+      } catch (error) {
+      } finally {
+      }
+    }
+    getFlowDetails();
+  }, []);
+
   //   useEffect(() => {
   //     async function fetchRoutes() {
   //       try {
@@ -287,7 +299,12 @@ const Studio = () => {
   }
 
   const back = () => {
-    router.push(`/dashboard`);
+    if (listGroupSelected) {
+      setListGroupSelected(false);
+      setListGroupNameSelected("");
+    } else {
+      router.push(`/dashboard`);
+    }
   }
 
   const createFlow = (name) => {
@@ -345,6 +362,17 @@ const Studio = () => {
   //     setNodes(updatedNodes);
   //   };
 
+  const [listGroupSelected, setListGroupSelected] = useState(false);
+  const [listGroupNameSelected, setListGroupNameSelected] = useState("");
+  const selectListGroup = (groupName) => {
+    setListGroupSelected(true);
+    setListGroupNameSelected(groupName);
+    setToogleActions(groupName)
+    console.log(params.id)
+  }
+
+
+
 
   return (
     <div className="dndflow flex flex-row">
@@ -356,75 +384,87 @@ const Studio = () => {
             Flows
           </button>
         </div> */}
-        <div className="mb-3 cursor-pointer" onClick={() => back()}>
-          <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 1 1.3 6.326a.91.91 0 0 0 0 1.348L7 13" />
-          </svg>
-        </div>
+        <div className='flex flex-row mb-3'>
+          <div className=" cursor-pointer" onClick={() => back()}>
+            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 1 1.3 6.326a.91.91 0 0 0 0 1.348L7 13" />
+            </svg>
+          </div>
 
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Agents")}
-            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Triggers
-          </button>
         </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Agents")}
-            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Data
+        {listGroupSelected && <div className='flex flex-row'>
+          <button disabled
+            className="w-full focus:outline-none text-white bg-slate-400   focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:focus:ring-slate-900">
+            {listGroupNameSelected}
           </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Agents")}
-            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Agents
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Agents")}
-            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Data Transformation
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Agents")}
-            className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Logic
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Tools")}
-            className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Apps
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Tools")}
-            className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            AI
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Tools")}
-            className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Input
-          </button>
-        </div>
-        <div className='flex flex-row'>
-          <button
-            onClick={() => setToogleActions("Tools")}
-            className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
-            Output
-          </button>
-        </div>
+        </div>}
+
+        {!listGroupSelected && <div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Triggers")}
+              className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Triggers
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Data")}
+              className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Data
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Agents")}
+              className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Agents
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Data Transformation")}
+              className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Data Transformation
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Logic")}
+              className="w-full focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Logic
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Apps")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Apps
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("AI")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              AI
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Input")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Input
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("Output")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Output
+            </button>
+          </div>
+        </div>}
+
 
         {/* <button onDragStart={(event) => onDragStart(event, 'input')} draggable type="button" className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Navbar</button> */}
         {_toogleActions === "Agents" &&
@@ -447,7 +487,7 @@ const Studio = () => {
               </div>
             ))}
           </div>}
-        {_toogleActions === "Tools" &&
+        {_toogleActions === "AI" &&
           <div className='flex-col flex'>
             {_tools?.map((tool, index) => (
               <div className="flex flex-row">
