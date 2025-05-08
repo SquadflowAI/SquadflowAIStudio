@@ -39,7 +39,7 @@ export async function getProjectAPI(name: string): Promise<ProjectDto> {
   }
 
   export async function getAllProjectsByUserIdAPI(userId: string): Promise<ProjectDto[]> {
-    const response = await fetch(`https://localhost:49163/api/Projects/all/${userId}`,
+    const response = await fetch(`https://localhost:49163/api/Projects/user-id/${userId}`,
     { cache: 'no-store' });
   
     if (!response.ok) {
