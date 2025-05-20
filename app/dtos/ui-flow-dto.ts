@@ -11,6 +11,7 @@ export class UIAgentNodeDto {
     public name: string;
     public positionX: number;
     public positionY: number;
+    public parameters: any;
 }
 
 export class UIAgentNodeConnectionDto {
