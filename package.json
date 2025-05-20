@@ -10,13 +10,18 @@
     "postinstall": "flowbite-react patch"
   },
   "dependencies": {
-    "@xyflow/react": "^12.4.2",
+    "@xyflow/react": "^12.6.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.11.7",
+    "lucide-react": "^0.509.0",
     "next": "15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "shortid": "^2.2.17"
+    "shortid": "^2.2.17",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",

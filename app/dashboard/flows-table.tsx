@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createUIFlowAPI, getAllUIFlowsAPI, getUIFlowsByProjectIdAPI } from "../api/api.uiflow";
+import { createUIFlowAPI, deleteUIFlowByIdAPI, getAllUIFlowsAPI, getUIFlowsByProjectIdAPI } from "../api/api.uiflow";
 import { useDataContext } from "../contexts/DataContext";
 import { UIFlowDto } from "../dtos/ui-flow-dto";
 import CreateFlowModal from "./create-flow-modal";
@@ -14,6 +14,12 @@ export default function FlowsTable() {
 
     const openCreateFlow = () => {
         setShowCreateFlow(true)
+    }
+
+    const deleteFlow = (id: any) => {
+        let deletedFlow = _flows.filter(x => x.id !== id);
+        setFlows(deletedFlow);
+        deleteUIFlowByIdAPI(id)
     }
 
     useEffect(() => {
@@ -85,9 +91,19 @@ export default function FlowsTable() {
                                     <td class="px-6 py-4">
                                         {row.name}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <button onClick={() => openStudio(row.id)} className="ml-auto cursor-pointer flex items-center p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">Studio</button>
+                                    <td class="px-6 py-4   ">
+                                        <button onClick={() => openStudio(row.id)} className="ml-auto cursor-pointer  p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">Studio</button>
                                     </td>
+                                    <td class="px-6 py-4  ">
+                                        <div onClick={() => deleteFlow(row.id)}>
+                                            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M4 7H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </td>
+
                                 </tr>
                             ))}
                         </tbody>

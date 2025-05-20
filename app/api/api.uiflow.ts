@@ -71,3 +71,14 @@ export async function getUIFlowAPI(name: string): Promise<UIFlowDto> {
     const data = await response.json();
     return data;
   }
+
+  export async function deleteUIFlowByIdAPI(id: string): Promise<any> {
+    const response = await fetch(`https://localhost:49163/api/UIFlow/id/${id}`,
+    { 
+      method: 'DELETE',
+      cache: 'no-store' });
+  
+    if (!response.ok) {
+      throw new Error('Failed to delete data');
+    }
+  }

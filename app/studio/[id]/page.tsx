@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -19,12 +19,13 @@ import { useParams } from 'next/navigation';
 import shortid from "shortid";
 import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../../dtos/ui-flow-dto';
 import { createUIFlowAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
-import { getAllToolsAPI } from '../../api/api.tools';
+import { getAllAIToolsAPI, getAllAppsAPI, getAllCoreToolsAPI, getAllToolsAPI } from '../../api/api.tools';
 import { getAllAgentsAPI } from '../../api/api.agents';
 import CreateFlowModal from '../create-flow-modal';
+import TooltipNodeComponent from '../tooltip-node';
+import CustomNode from '../custom-node';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
-
 
 const initialNodes = [
   { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
@@ -37,6 +38,11 @@ const AICHAT = "AICHAT"
 const DATAINPUT = 'Data Input';
 const SAVEINDB = 'Save in DB';
 const OPENPAGE = 'Open Page';
+
+const nodeTypes = {
+  tooltipNode: TooltipNodeComponent,
+  custom: CustomNode,
+};
 
 const Studio = () => {
   const params = useParams();
@@ -60,6 +66,11 @@ const Studio = () => {
   const [_actionName, setActionName] = useState('');
   const [_routes, setRoutes] = useState([]);
   const [_tools, setTools] = useState(null);
+  const [_coreTools, setCoreTools] = useState(null);
+  const [_inputTools, setInputTools] = useState(null);
+  const [_outputTools, setOutputTools] = useState(null);
+  const [_aiTools, setAITools] = useState(null);
+  const [_apps, setApps] = useState(null);
   const [_agents, setAgents] = useState(null);
   const [_uiFlows, setUiFlows] = useState([]);
   const [_uiFlow, setUiFlow] = useState([]);
@@ -67,6 +78,8 @@ const Studio = () => {
   const router = useRouter();
   const [showPage, setShowPage] = useState(false);
   const closeModal = () => setShowPage(false);
+  const [_isPropertiesClicked, setIsPropertiesClicked] = useState(false);
+
 
   let ordNubmer = 0;
   const getOrderNumber = () => {
@@ -83,6 +96,7 @@ const Studio = () => {
     async function getFlowDetails() {
       try {
         const response = await getUIFlowByIdAPI(params.id);
+        console.log(response)
         setUiFlow(response);
 
       } catch (error) {
@@ -111,6 +125,47 @@ const Studio = () => {
   }, []);
 
   useEffect(() => {
+    async function getCoreTools() {
+      try {
+        const response = await getAllCoreToolsAPI();
+        let coreTools = response.filter(x => x.type == "core")
+        let inputTools = response.filter(x => x.type == "input")
+        let outputTools = response.filter(x => x.type == "output")
+        setCoreTools(coreTools);
+        setInputTools(inputTools);
+        setOutputTools(outputTools);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getCoreTools();
+  }, []);
+
+  useEffect(() => {
+    async function getAITools() {
+      try {
+        const response = await getAllAIToolsAPI();
+        setAITools(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getAITools();
+  }, []);
+
+  useEffect(() => {
+    async function getApps() {
+      try {
+        const response = await getAllAppsAPI();
+        setApps(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getApps();
+  }, []);
+
+  useEffect(() => {
     async function getAgents() {
       try {
         const response = await getAllAgentsAPI();
@@ -133,6 +188,7 @@ const Studio = () => {
     }
     getFlowDetails();
   }, []);
+
 
 
 
@@ -164,7 +220,7 @@ const Studio = () => {
       const newNode = {
         id: shortid.generate(),
         name: type,
-        type,
+        type: "custom",// "tooltipNode",
         position,
         data: { label: `${type}` },
       };
@@ -179,6 +235,9 @@ const Studio = () => {
 
   const onNodeClick = useCallback((event, node) => {
 
+    setIsPropertiesClicked(true);
+    console.log(node)
+    setSelectedNode(node);
 
   }, []);
 
@@ -186,13 +245,19 @@ const Studio = () => {
     if (!_uiFlow) {
       return;
     }
+
+    if (!_uiFlow.id) {
+      _uiFlow.id = params.id;
+    }
     //_selectedOrchestration.name = _actionName;
     _uiFlow.nodes = [];
     _uiFlow.connections = [];
     nodes.forEach(element => {
+      console.log(element)
       let node = new UIAgentNodeDto();
       node.id = element.id, //shortid.generate(),
-      node.name = element.name;
+      node.name = element.data.label;
+      node.parameters = element.data.parameters;
       node.positionX = element.position.x;
       node.positionY = element.position.y;
 
@@ -232,10 +297,10 @@ const Studio = () => {
     if (flow.nodes) {
       const newNodes = flow.nodes.map((node) => ({
         id: node?.id,  // Use nodeId from the API data
-        type: node?.type || 'default',  // Use the node type or default to 'default'
+        type: "custom", //node?.type || 'default',  // Use the node type or default to 'default'
         //flowToScreenPosition
         position: reactFlowInstance.flowToScreenPosition({ x: node?.positionX, y: node?.positionY }),  // Position from API
-        data: { label: node?.name },  // Label from API or fallback
+        data: { label: node?.name, parameters: node?.parameters },  // Label from API or fallback
         // databaseEntityInput: apiNode.databaseEntityInput,
         // databaseEntityOutput: apiNode.databaseEntityOutput,
       }));
@@ -260,7 +325,7 @@ const Studio = () => {
       reactFlowInstance.fitView();
     }
 
-    
+
 
   }
 
@@ -293,6 +358,10 @@ const Studio = () => {
     // setDtoTest(workflow);
   };
 
+  const closeProperties = () => {
+    setIsPropertiesClicked(false)
+  }
+
 
 
   const [listGroupSelected, setListGroupSelected] = useState(false);
@@ -303,6 +372,53 @@ const Studio = () => {
     setToogleActions(groupName)
     console.log(params.id)
   }
+
+
+  const handleDeleteNode = useCallback((id: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== id));
+    setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+  }, []);
+
+  const nodesWithCallbacks = useMemo(() => {
+    return nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        onDelete: handleDeleteNode,
+      },
+    }));
+  }, [nodes, handleDeleteNode]);
+
+  const handleTextInputChange = (nodeId, e) => {
+    console.log(e)
+    updateNodeParameter(nodeId, "text", e.target.value);
+  };
+
+  const handleLLMPromptChange = (nodeId, e) => {
+    updateNodeParameter(nodeId, "prompt", e.target.value);
+  };
+
+  const updateNodeParameter = (nodeId, key, value) => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              parameters: {
+                ...(node.data.parameters || {}),
+                [key]: value,
+              },
+            },
+          };
+        }
+        return node;
+      })
+    );
+  };
+
+
 
 
 
@@ -372,6 +488,20 @@ const Studio = () => {
           </div>
           <div className='flex flex-row'>
             <button
+              onClick={() => selectListGroup("Tools")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Tools
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
+              onClick={() => selectListGroup("CoreTools")}
+              className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
+              Core
+            </button>
+          </div>
+          <div className='flex flex-row'>
+            <button
               onClick={() => selectListGroup("AI")}
               className="w-full justify-center focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-xs py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
               AI
@@ -415,9 +545,59 @@ const Studio = () => {
               </div>
             ))}
           </div>} */}
-        {_toogleActions === "AI" &&
+        {(_toogleActions === "AI" && listGroupNameSelected) &&
+          <div className='flex-col flex'>
+            {_aiTools?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {(_toogleActions === "Tools" && listGroupNameSelected) &&
           <div className='flex-col flex'>
             {_tools?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {(_toogleActions === "CoreTools" && listGroupNameSelected) &&
+          <div className='flex-col flex'>
+            {_coreTools?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {(_toogleActions === "Apps" && listGroupNameSelected) &&
+          <div className='flex-col flex'>
+            {_apps?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {(_toogleActions === "Input" && listGroupNameSelected) &&
+          <div className='flex-col flex'>
+            {_inputTools?.map((tool, index) => (
+              <div className="flex flex-row">
+                <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
+                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name}</button>
+              </div>
+            ))}
+          </div>}
+        {(_toogleActions === "Output" && listGroupNameSelected) &&
+          <div className='flex-col flex'>
+            {_outputTools?.map((tool, index) => (
               <div className="flex flex-row">
                 <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
                   className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
@@ -430,7 +610,7 @@ const Studio = () => {
         <ReactFlowProvider>
           <div className="reactflow-wrapper" ref={reactFlowWrapper}>
             <ReactFlow
-              nodes={nodes}
+              nodes={nodesWithCallbacks}
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
@@ -439,6 +619,7 @@ const Studio = () => {
               onInit={setReactFlowInstance}
               onDrop={onDrop}
               onDragOver={onDragOver}
+              nodeTypes={nodeTypes}
               fitView
             >
               <Controls />
@@ -460,9 +641,42 @@ const Studio = () => {
         {/* <CreateFlowModal isOpen={showPage}
           onClose={closeModal}
           onAddPage={createFlow} ></CreateFlowModal> */}
-        <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-          Save
-        </button>
+        {!_isPropertiesClicked && <div className='flex flex-col'>
+          <button onClick={saveWorkflow} className="focus:outline-none text-white bg-slate-500 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Run
+          </button>
+          <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Save
+          </button>
+
+          Past runs:
+        </div>}
+        {_isPropertiesClicked && <div className='flex flex-col'>
+          <div className='flex flex-row'>
+            <span class="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">
+              {_selectedNode?.data?.label}
+            </span>
+
+            <div onClick={() => closeProperties()} className='cursor-pointer flex ml-auto'>
+              <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="#0F1729" />
+              </svg>
+            </div>
+          </div>
+
+          {_selectedNode?.data?.label == 'Text Input' && <div className="mb-5">
+            <textarea id="message" rows="4" value={_selectedNode.data.parameters.text} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea>
+          </div>}
+          {_selectedNode?.data?.label == 'LLM Promt' && <div className="mb-5">
+            <textarea id="message" rows="4" value={_selectedNode.data.parameters.prompt} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>
+          </div>}
+
+          {_selectedNode?.data?.label !== 'Text Output' && <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Save
+          </button>}
+
+        </div>}
+
 
       </div>
       <div>
