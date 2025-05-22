@@ -18,7 +18,7 @@ import { useParams } from 'next/navigation';
 
 import shortid from "shortid";
 import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../../dtos/ui-flow-dto';
-import { createUIFlowAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
+import { createUIFlowAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, runUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
 import { getAllAIToolsAPI, getAllAppsAPI, getAllCoreToolsAPI, getAllToolsAPI } from '../../api/api.tools';
 import { getAllAgentsAPI } from '../../api/api.agents';
 import CreateFlowModal from '../create-flow-modal';
@@ -58,7 +58,8 @@ const Studio = () => {
   const [_toogleProperties, setToogleProperties] = useState(PROPERTIES);
   const [_actions, setActions] = useState([]);
   const [_action, setAction] = useState(null);
-  const [_selectedNode, setSelectedNode] = useState(null);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const _selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const [_entities, setEntities] = useState([]);
   // const [_selectedEntityOption, setSelectedEntityOption] = useState(null);
   // const [_selectedPageRoute, setSelectedPageRoute] = useState(null);
@@ -80,6 +81,11 @@ const Studio = () => {
   const closeModal = () => setShowPage(false);
   const [_isPropertiesClicked, setIsPropertiesClicked] = useState(false);
 
+  const toolsRef = useRef([]);
+  // const aiToolsRef = useRef(null);
+  // const coreToolsRef = useRef(null);
+  // const inputToolsRef = useRef(null);
+  // const outputToolsRef = useRef(null);
 
   let ordNubmer = 0;
   const getOrderNumber = () => {
@@ -117,6 +123,8 @@ const Studio = () => {
       try {
         const response = await getAllToolsAPI();
         setTools(response);
+
+        toolsRef.current.push(...response);
       } catch (error) {
       } finally {
       }
@@ -134,6 +142,13 @@ const Studio = () => {
         setCoreTools(coreTools);
         setInputTools(inputTools);
         setOutputTools(outputTools);
+
+        toolsRef.current.push(...coreTools);
+        toolsRef.current.push(...inputTools);
+        toolsRef.current.push(...outputTools);
+        // coreToolsRef.current = coreTools;
+        // inputToolsRef.current = inputTools;
+        // outputToolsRef.current = outputTools;
       } catch (error) {
       } finally {
       }
@@ -146,6 +161,9 @@ const Studio = () => {
       try {
         const response = await getAllAIToolsAPI();
         setAITools(response);
+
+        toolsRef.current.push(...response);
+        //aiToolsRef.current = response;
       } catch (error) {
       } finally {
       }
@@ -205,7 +223,7 @@ const Studio = () => {
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
-
+      console.log(event);
       const type = event.dataTransfer.getData('application/reactflow');
 
       // check if the dropped element is valid
@@ -217,12 +235,18 @@ const Studio = () => {
         x: event.clientX,
         y: event.clientY,
       });
+ 
+
+      console.log(toolsRef)
+      const tools = toolsRef.current;
+      const typeFromDb = tools.find(x => x.name === type);
+
       const newNode = {
         id: shortid.generate(),
         name: type,
         type: "custom",// "tooltipNode",
         position,
-        data: { label: `${type}` },
+        data: { label: `${type}`, type: typeFromDb.key },
       };
 
       setNodes((nds) => [...nds, newNode]);
@@ -237,7 +261,7 @@ const Studio = () => {
 
     setIsPropertiesClicked(true);
     console.log(node)
-    setSelectedNode(node);
+    setSelectedNodeId(node.id);
 
   }, []);
 
@@ -258,6 +282,7 @@ const Studio = () => {
       node.id = element.id, //shortid.generate(),
       node.name = element.data.label;
       node.parameters = element.data.parameters;
+      node.type = element.data.type;
       node.positionX = element.position.x;
       node.positionY = element.position.y;
 
@@ -279,6 +304,10 @@ const Studio = () => {
       //  
     }
   }
+  const runWorkflow = () => {
+    runUIFlowByIdAPI(_uiFlow.id);
+  }
+  
 
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -300,7 +329,7 @@ const Studio = () => {
         type: "custom", //node?.type || 'default',  // Use the node type or default to 'default'
         //flowToScreenPosition
         position: reactFlowInstance.flowToScreenPosition({ x: node?.positionX, y: node?.positionY }),  // Position from API
-        data: { label: node?.name, parameters: node?.parameters },  // Label from API or fallback
+        data: { label: node?.name, parameters: node?.parameters, type: node?.type  },  // Label from API or fallback
         // databaseEntityInput: apiNode.databaseEntityInput,
         // databaseEntityOutput: apiNode.databaseEntityOutput,
       }));
@@ -642,7 +671,7 @@ const Studio = () => {
           onClose={closeModal}
           onAddPage={createFlow} ></CreateFlowModal> */}
         {!_isPropertiesClicked && <div className='flex flex-col'>
-          <button onClick={saveWorkflow} className="focus:outline-none text-white bg-slate-500 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+          <button onClick={runWorkflow} className="focus:outline-none text-white bg-slate-500 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
             Run
           </button>
           <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
@@ -665,10 +694,15 @@ const Studio = () => {
           </div>
 
           {_selectedNode?.data?.label == 'Text Input' && <div className="mb-5">
-            <textarea id="message" rows="4" value={_selectedNode.data.parameters.text} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea>
+            <textarea id="message"  key={_selectedNode.id}  rows="4" value={_selectedNode?.data?.parameters?.text || ""} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea>
           </div>}
+
           {_selectedNode?.data?.label == 'LLM Promt' && <div className="mb-5">
-            <textarea id="message" rows="4" value={_selectedNode.data.parameters.prompt} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>
+            <textarea id="message"  key={_selectedNode.id}  rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>
+          </div>}
+
+          {_selectedNode?.data?.label == 'Text Output' && <div className="mb-5">
+            <textarea id="message" disabled key={_selectedNode.id}  rows="4" value={_selectedNode.data?.parameters?.textOutput || ""} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></textarea>
           </div>}
 
           {_selectedNode?.data?.label !== 'Text Output' && <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">

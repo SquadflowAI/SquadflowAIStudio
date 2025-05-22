@@ -82,3 +82,14 @@ export async function getUIFlowAPI(name: string): Promise<UIFlowDto> {
       throw new Error('Failed to delete data');
     }
   }
+
+  export async function runUIFlowByIdAPI(id: string): Promise<any> {
+    const response = await fetch(`https://localhost:49163/api/UIFlow/run/${id}`,
+    { 
+      method: 'POST',
+      cache: 'no-store' });
+  
+    if (!response.ok) {
+      throw new Error('Failed to delete data');
+    }
+  }
