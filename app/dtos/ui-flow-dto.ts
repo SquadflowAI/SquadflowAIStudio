@@ -1,5 +1,6 @@
 export class UIFlowDto {
     public id: string;
+    public userId: string;
     public projectId: string;
     public name: string;
     public nodes: UIAgentNodeDto[];
@@ -13,6 +14,7 @@ export class UIAgentNodeDto {
     public positionX: number;
     public positionY: number;
     public parameters: any;
+    public output: string;
 }
 
 export class UIAgentNodeConnectionDto {

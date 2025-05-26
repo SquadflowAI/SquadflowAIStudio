@@ -4,6 +4,7 @@ import { useDataContext } from "../contexts/DataContext";
 import { UIFlowDto } from "../dtos/ui-flow-dto";
 import CreateFlowModal from "./create-flow-modal";
 import { useRouter } from "@/node_modules/next/navigation";
+import { useAuth } from "../contexts/AuthProvider";
 
 export default function FlowsTable() {
     const [_flows, setFlows] = useState([]);
@@ -11,6 +12,7 @@ export default function FlowsTable() {
     const closeModal = () => setShowCreateFlow(false);
     const { projectInMemory } = useDataContext();
     const router = useRouter();
+    const { user } = useAuth();
 
     const openCreateFlow = () => {
         setShowCreateFlow(true)
@@ -39,6 +41,7 @@ export default function FlowsTable() {
 
         let flow = new UIFlowDto();
         flow.projectId = projectInMemory?.id;
+        flow.userId = user?.id;
         flow.name = name;
 
         _flows.push(flow);
