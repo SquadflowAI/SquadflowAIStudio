@@ -37,16 +37,25 @@ export default function FlowsTable() {
         getUIFlows();
     }, []);
 
-    const createFlow = (name) => {
+    const createFlow = async (name) => {
 
         let flow = new UIFlowDto();
         flow.projectId = projectInMemory?.id;
-        flow.userId = user?.id;
+        flow.userId = user?.userId;
         flow.name = name;
 
         _flows.push(flow);
 
-        createUIFlowAPI(flow);
+        const res = await createUIFlowAPI(flow);
+        if (res.ok) {
+            try {
+                const response = await getUIFlowsByProjectIdAPI(projectInMemory?.id);
+                setFlows(response);
+            } catch (error) {
+                console.log(error)
+            } finally {
+            }
+        }
     };
 
     const openStudio = (id) => {

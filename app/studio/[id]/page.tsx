@@ -18,12 +18,13 @@ import { useParams } from 'next/navigation';
 
 import shortid from "shortid";
 import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../../dtos/ui-flow-dto';
-import { createUIFlowAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, runUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
+import { createUIFlowAPI, getActionRunsByFlowIdAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, runUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
 import { getAllAIToolsAPI, getAllAppsAPI, getAllCoreToolsAPI, getAllToolsAPI } from '../../api/api.tools';
 import { getAllAgentsAPI } from '../../api/api.agents';
 import CreateFlowModal from '../create-flow-modal';
 import TooltipNodeComponent from '../tooltip-node';
 import CustomNode from '../custom-node';
+import ResultFlowModal from '../result-flow-modal';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
 
@@ -77,9 +78,11 @@ const Studio = () => {
   const [_uiFlow, setUiFlow] = useState([]);
   //const [orderNumber, setOrderNumber] = useState(0);
   const router = useRouter();
-  const [showPage, setShowPage] = useState(false);
-  const closeModal = () => setShowPage(false);
+  const [showPageResult, setShowPageResult] = useState(false);
+  const closeModalResult = () => setShowPageResult(false);
   const [_isPropertiesClicked, setIsPropertiesClicked] = useState(false);
+  const [_actionRuns, setActionRuns] = useState([]);
+
 
   const toolsRef = useRef([]);
   // const aiToolsRef = useRef(null);
@@ -95,8 +98,13 @@ const Studio = () => {
   };
 
   const openCreateUIFlow = () => {
-    setShowPage(true)
+    //  setShowPage(true)
   }
+
+  const openResultFlow = () => {
+    setShowPageResult(true)
+  }
+
 
   useEffect(() => {
     async function getFlowDetails() {
@@ -111,6 +119,23 @@ const Studio = () => {
     }
     getFlowDetails();
   }, []);
+
+
+  useEffect(() => {
+    async function getActionRuns() {
+      try {
+        const response = await getActionRunsByFlowIdAPI(params.id);
+        console.log(response)
+        setActionRuns(response);
+      } catch (error) {
+      } finally {
+      }
+    }
+    getActionRuns();
+  }, []);
+
+
+
 
   useEffect(() => {
     if (_uiFlow && reactFlowInstance) {
@@ -311,11 +336,27 @@ const Studio = () => {
   const runWorkflow = async () => {
     setIsRunningWorkflow(true);
     try {
-      await runUIFlowByIdAPI(_uiFlow.id); // wait for API response
-      // Optional: handle success (e.g., show a success message)
+      let res = await runUIFlowByIdAPI(_uiFlow.id); // wait for API response
+
+      if (res.ok) {
+        try {
+          const responseFlow = await getUIFlowByIdAPI(params.id);
+          setUiFlow(responseFlow);
+
+          const responseActionRuns = await getActionRunsByFlowIdAPI(params.id);
+          setActionRuns(responseActionRuns);
+
+        } catch (error) {
+          console.log(error)
+
+        } finally {
+
+        }
+
+      }
+
     } catch (error) {
       console.error("Workflow run failed", error);
-      // Optional: handle error (e.g., show error message)
     } finally {
       setIsRunningWorkflow(false); // Always turn off loading
     }
@@ -703,7 +744,23 @@ const Studio = () => {
             Save
           </button>
 
-          Past runs:
+          <div className='flex justify-center'>Past runs:</div>
+
+          {_actionRuns?.map((actionRun, index) => (
+
+            <div className="flex flex-row items-center">
+              <div>
+                <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{actionRun?.createdDate}</span>
+              </div>
+              <button onClick={openResultFlow} className="focus:outline-none text-black bg-blue-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                Result
+              </button>
+              <ResultFlowModal isOpen={showPageResult}
+                onClose={closeModalResult} result={actionRun.data}></ResultFlowModal>
+            </div>
+          ))}
+          Count: {_actionRuns?.length}
+
         </div>}
         {_isPropertiesClicked && <div className='flex flex-col'>
           <div className='flex flex-row'>

@@ -1,16 +1,18 @@
+import { ActionRunDto } from "../dtos/action-run-dto";
 import { UIFlowDto } from "../dtos/ui-flow-dto";
 
 export async function createUIFlowAPI(uiFlow: UIFlowDto) {
-    const response = await fetch('https://localhost:49163/api/UIFlow/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(uiFlow),
-    });
-  
-    await response.json();
+  const response = await fetch('https://localhost:49163/api/UIFlow/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(uiFlow),
+  });
+
+  return response;
 }
+
 
 export async function updateUIFlowAPI(uiFlow: UIFlowDto) {
   const response = await fetch('https://localhost:49163/api/UIFlow/update', {
@@ -88,8 +90,31 @@ export async function getUIFlowAPI(name: string): Promise<UIFlowDto> {
     { 
       method: 'POST',
       cache: 'no-store' });
-  
+
+    return response;
+  }
+
+  //ACTION RUNS
+
+  export async function getActionRunsByAgentIdAPI(id: string): Promise<ActionRunDto[]> {
+    const response = await fetch(`https://localhost:49163/api/UIFlow/action-runs/by-agentid/${id}`,
+    { cache: 'no-store' });
     if (!response.ok) {
-      throw new Error('Failed to delete data');
+      throw new Error('Failed to fetch data');
     }
+    const data = await response.json();
+    return data;
+
+  }
+
+  export async function getActionRunsByFlowIdAPI(id: string): Promise<ActionRunDto[]> {
+    const response = await fetch(`https://localhost:49163/api/UIFlow/action-runs/by-flowid/${id}`,
+    { cache: 'no-store' });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    const data = await response.json();
+    return data;
   }
