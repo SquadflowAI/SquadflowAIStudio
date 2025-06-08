@@ -14,6 +14,7 @@ export class UIAgentNodeDto {
     public positionX: number;
     public positionY: number;
     public parameters: any;
+    public input: string;
     public output: string;
 }
 

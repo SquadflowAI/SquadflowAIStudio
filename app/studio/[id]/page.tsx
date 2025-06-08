@@ -232,13 +232,52 @@ const Studio = () => {
     getFlowDetails();
   }, []);
 
-
-
-
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    (params) => {
+      console.log('Edge connection params:', params);
+
+      setEdges((eds) => addEdge(params, eds));
+
+      const sourceNode = nodes.find((node) => node.id === params.source);
+      const targetNode = nodes.find((node) => node.id === params.target);
+
+      const sourceTextValue = sourceNode?.data?.parameters?.text;
+
+      if (sourceTextValue !== undefined && targetNode) {
+        setNodes((nds) =>
+          nds.map((node) =>
+            node.id === targetNode.id
+              ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  input: {
+                    ...(node.data.input || {}), // ensure input object exists
+                    text: sourceTextValue,       // set/overwrite "text" field
+                  },
+                },
+              }
+              : node
+          )
+        );
+      }
+    },
+    [setEdges, setNodes, nodes]
   );
+
+
+
+  // const onConnect = useCallback(
+  //   (params) => {
+  //     console.log('Connecting edge with params:', params);
+  //     setEdges((eds) => {
+  //       const newEdges = addEdge(params, eds);
+  //       console.log('Updated edges:', newEdges);
+  //       return newEdges;
+  //     });
+  //   },
+  //   [setEdges],
+  // );
 
   const onDragOver = useCallback((event) => {
     event.preventDefault();
@@ -307,6 +346,7 @@ const Studio = () => {
       node.id = element.id, //shortid.generate(),
         node.name = element.data.label;
       node.parameters = element.data.parameters;
+      node.input = element.data.input;
       node.output = element.data.output;
       node.type = element.data.type;
       node.positionX = element.position.x;
@@ -388,6 +428,7 @@ const Studio = () => {
           label: node?.name,
           parameters: node?.parameters,
           type: node?.type,
+          input: node?.input,
           output: node?.output
         },  // Label from API or fallback
         // databaseEntityInput: apiNode.databaseEntityInput,
@@ -487,6 +528,12 @@ const Studio = () => {
     updateNodeParameter(nodeId, "prompt", e.target.value);
   };
 
+  const handleWebResearchPromptChange = (nodeId, e) => {
+    updateNodeParameter(nodeId, "prompt", e.target.value);
+  };
+
+  
+
   const updateNodeParameter = (nodeId, key, value) => {
     setNodes((prevNodes) =>
       prevNodes.map((node) => {
@@ -506,10 +553,6 @@ const Studio = () => {
       })
     );
   };
-
-
-
-
 
 
   return (
@@ -785,6 +828,10 @@ const Studio = () => {
 
           {_selectedNode?.data?.label == 'Text Output' && <div className="mb-5">
             <textarea id="message" disabled key={_selectedNode.id} rows="4" value={_selectedNode.data?.output || ""} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></textarea>
+          </div>}
+
+          {_selectedNode?.data?.label == 'Web Research' && <div className="mb-5">
+            <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleWebResearchPromptChange(_selectedNode.id, e)}  className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></textarea>
           </div>}
 
           {_selectedNode?.data?.label !== 'Text Output' && <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
