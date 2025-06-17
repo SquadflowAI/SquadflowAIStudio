@@ -67,10 +67,13 @@ export default function ProjectsTable() {
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" className="px-6 py-3">
-                                    Id
+                                    Name
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Name
+                                    Flows
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Users
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Created
@@ -84,9 +87,6 @@ export default function ProjectsTable() {
                             {_projects.map((row) => (
                                 <tr onClick={() => selectProject(row)} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {row.id}
-                                    </th>
-                                    <td className="px-6 py-4">
                                         {projectInMemory?.id === row.id ? (
                                             <span className="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 rounded-full dark:bg-blue-900 dark:text-blue-300">
                                                 {row.name}
@@ -94,6 +94,12 @@ export default function ProjectsTable() {
                                         ) : (
                                             <span>{row.name}</span>
                                         )}
+                                    </th>
+                                    <td className="px-6 py-4">
+                                        -
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        -
                                     </td>
                                     <td className="px-6 py-4">
                                         {row.createdDate}

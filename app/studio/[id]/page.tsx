@@ -79,7 +79,12 @@ const Studio = () => {
   //const [orderNumber, setOrderNumber] = useState(0);
   const router = useRouter();
   const [showPageResult, setShowPageResult] = useState(false);
-  const closeModalResult = () => setShowPageResult(false);
+  const [selectedResult, setSelectedResult] = useState(null);
+
+  const closeModalResult = () => {
+    setShowPageResult(false);
+    setSelectedResult(null);
+  }
   const [_isPropertiesClicked, setIsPropertiesClicked] = useState(false);
   const [_actionRuns, setActionRuns] = useState([]);
 
@@ -101,7 +106,8 @@ const Studio = () => {
     //  setShowPage(true)
   }
 
-  const openResultFlow = () => {
+  const openResultFlow = (resultData) => {
+    setSelectedResult(resultData);
     setShowPageResult(true)
   }
 
@@ -532,8 +538,6 @@ const Studio = () => {
     updateNodeParameter(nodeId, "prompt", e.target.value);
   };
 
-  
-
   const updateNodeParameter = (nodeId, key, value) => {
     setNodes((prevNodes) =>
       prevNodes.map((node) => {
@@ -789,17 +793,17 @@ const Studio = () => {
 
           <div className='flex justify-center'>Past runs:</div>
 
-          {_actionRuns?.map((actionRun, index) => (
+          {_actionRuns?.map((actionRunRun, index) => (
 
-            <div className="flex flex-row items-center">
-              <div>
-                <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{actionRun?.createdDate}</span>
+            <div className="flex flex-row items-center mt-1 mb-1">
+              <div className='w-2/3'>
+                <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{actionRunRun?.createdDate}</span>
               </div>
-              <button onClick={openResultFlow} className="focus:outline-none text-black bg-blue-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+              <button  onClick={() => openResultFlow(actionRunRun?.data)} className="w-1/3 focus:outline-none text-black bg-blue-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
                 Result
               </button>
               <ResultFlowModal isOpen={showPageResult}
-                onClose={closeModalResult} result={actionRun.data}></ResultFlowModal>
+                onClose={closeModalResult} result={selectedResult}></ResultFlowModal>
             </div>
           ))}
           Count: {_actionRuns?.length}
@@ -822,6 +826,11 @@ const Studio = () => {
             <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode?.data?.parameters?.text || ""} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea>
           </div>}
 
+          {_selectedNode?.data?.label == 'Pdf Input' && <div className="mb-5">
+            Pdf Input
+            {/* <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode?.data?.parameters?.text || ""} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea> */}
+          </div>}
+
           {_selectedNode?.data?.label == 'LLM Promt' && <div className="mb-5">
             <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>
           </div>}
@@ -831,7 +840,7 @@ const Studio = () => {
           </div>}
 
           {_selectedNode?.data?.label == 'Web Research' && <div className="mb-5">
-            <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleWebResearchPromptChange(_selectedNode.id, e)}  className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></textarea>
+            <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleWebResearchPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></textarea>
           </div>}
 
           {_selectedNode?.data?.label !== 'Text Output' && <button onClick={saveWorkflow} className="focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">

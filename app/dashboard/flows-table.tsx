@@ -81,10 +81,13 @@ export default function FlowsTable() {
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="px-6 py-3">
-                                    Id
+                                    Name
                                 </th>
                                 <th scope="col" class="px-6 py-3">
-                                    Name
+                                    Project
+                                </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Created Date
                                 </th>
                                 <th scope="col" class="px-6 py-3">
 
@@ -98,10 +101,13 @@ export default function FlowsTable() {
                             {_flows.map((row) => (
                                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
                                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {row.id}
+                                        {row.name}
                                     </th>
                                     <td class="px-6 py-4">
-                                        {row.name}
+                                        -
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        -
                                     </td>
                                     <td class="px-6 py-4   ">
                                         <button onClick={() => openStudio(row.id)} className="ml-auto cursor-pointer  p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">Studio</button>

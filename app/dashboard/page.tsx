@@ -115,7 +115,7 @@ const Dashboard = () => {
                 <div className="h-full px-3 py-4 overflow-y-auto bg-slate-100 dark:bg-gray-800">
 
                     <ul className="space-y-2 font-medium">
-                        {!projectInMemory && <span className="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">No project</span>}
+                        {!projectInMemory && <span className="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">No project selected</span>}
                         {projectInMemory && <span className="bg-blue-100 text-blue-800 text-base font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"> {projectInMemory.name} project</span>}
                         <li>
                             <a onClick={() => handleSelectedWindow("Projects")} className="cursor-pointer flex items-center p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">
