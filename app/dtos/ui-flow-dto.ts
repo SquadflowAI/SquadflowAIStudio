@@ -14,6 +14,8 @@ export class UIAgentNodeDto {
     public positionX: number;
     public positionY: number;
     public parameters: any;
+    public parametersIFormFile: any;
+    public parametersFileUrls: any;
     public input: string;
     public output: string;
 }

@@ -9,8 +9,8 @@ export default function Home() {
       <Navbar></Navbar>
       <div className='min-h-screen home-page-body'>
         <div className="text-5xl font-black text-center justify-center flex 
-  bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 
-  bg-clip-text text-transparent">
+          bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 
+          bg-clip-text text-transparent">
           Build AI Agents and Websites
         </div>
         <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Re-Gain hundreds of hours for your business</div>
@@ -21,10 +21,10 @@ export default function Home() {
         <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Use Cases</div>
         <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Features</div>
         Build your own custom AI Agents
-<div className="flex flex-row">
-<div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Accounting</div>
-<div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Mortgage Lending</div>
-</div>
+          <div className="flex flex-row">
+          <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Accounting</div>
+          <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Mortgage Lending</div>
+          </div>
 
         <div className='text-slate-400 justify-center flex text-3xl mt-5 text-center font-bold'>Templates</div>
       </div>

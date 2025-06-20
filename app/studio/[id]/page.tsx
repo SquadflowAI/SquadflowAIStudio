@@ -12,19 +12,18 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useRouter } from "@/node_modules/next/navigation";
-
 import { useParams } from 'next/navigation';
-
-
 import shortid from "shortid";
 import { UIAgentNodeConnectionDto, UIAgentNodeDto, UIFlowDto } from '../../dtos/ui-flow-dto';
-import { createUIFlowAPI, getActionRunsByFlowIdAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, runUIFlowByIdAPI, updateUIFlowAPI } from '../../api/api.uiflow';
+import { createUIFlowAPI, getActionRunsByFlowIdAPI, getAllUIFlowsAPI, getUIFlowByIdAPI, runUIFlowByIdAPI, updateUIFlowAPI, uploadPdfToNodeAPI } from '../../api/api.uiflow';
 import { getAllAIToolsAPI, getAllAppsAPI, getAllCoreToolsAPI, getAllToolsAPI } from '../../api/api.tools';
 import { getAllAgentsAPI } from '../../api/api.agents';
 import CreateFlowModal from '../create-flow-modal';
 import TooltipNodeComponent from '../tooltip-node';
 import CustomNode from '../custom-node';
 import ResultFlowModal from '../result-flow-modal';
+import FileUploadTool from '../file-upload-tool';
+import PdfModal from '../pdf-viewer';
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
 
@@ -88,6 +87,8 @@ const Studio = () => {
   const [_isPropertiesClicked, setIsPropertiesClicked] = useState(false);
   const [_actionRuns, setActionRuns] = useState([]);
 
+  const [showModalPdfViewer, setShowModalPdfViewer] = useState(false);
+
 
   const toolsRef = useRef([]);
   // const aiToolsRef = useRef(null);
@@ -110,6 +111,8 @@ const Studio = () => {
     setSelectedResult(resultData);
     setShowPageResult(true)
   }
+
+
 
 
   useEffect(() => {
@@ -335,47 +338,72 @@ const Studio = () => {
 
   }, []);
 
-  const saveWorkflow = () => {
-    if (!_uiFlow) {
-      return;
-    }
-
+  const saveWorkflow = async () => {
+    if (!_uiFlow) return;
+  
     if (!_uiFlow.id) {
       _uiFlow.id = params.id;
     }
-    //_selectedOrchestration.name = _actionName;
+  
     _uiFlow.nodes = [];
     _uiFlow.connections = [];
-    nodes.forEach(element => {
-      console.log(element)
-      let node = new UIAgentNodeDto();
-      node.id = element.id, //shortid.generate(),
-        node.name = element.data.label;
+  
+    const fileUploadQueue: Array<{
+      nodeId: string;
+      key: string;
+      file: File;
+    }> = [];
+  
+    // Build UIFlow and extract file upload info
+    nodes.forEach((element) => {
+      const node = new UIAgentNodeDto();
+      node.id = element.id;
+      node.name = element.data.label;
       node.parameters = element.data.parameters;
       node.input = element.data.input;
       node.output = element.data.output;
       node.type = element.data.type;
       node.positionX = element.position.x;
       node.positionY = element.position.y;
-
+  
+      // Queue file uploads
+      const fileMap = element.data.parametersIFormFile;
+      if (fileMap) {
+        Object.entries(fileMap).forEach(([key, file]) => {
+          if (file instanceof File) {
+            fileUploadQueue.push({ nodeId: node.id, key, file });
+          }
+        });
+      }
+  
       _uiFlow.nodes.push(node);
     });
-    edges.forEach(element => {
-      let edge = new UIAgentNodeConnectionDto();
+  
+    // Build connections
+    edges.forEach((element) => {
+      const edge = new UIAgentNodeConnectionDto();
       edge.sourceNodeId = element.source;
       edge.targetNodeId = element.target;
-
       _uiFlow.connections.push(edge);
     });
-
-    console.log(_uiFlow)
-    updateUIFlowAPI(_uiFlow);
-    if (_action) {
-
-    } else {
-      //  
+  
+    console.log("Saving flow:", _uiFlow);
+  
+    try {
+      await updateUIFlowAPI(_uiFlow); // Save flow & nodes first
+  
+      // Upload files per node
+      for (const item of fileUploadQueue) {
+        await uploadPdfToNodeAPI(item.file, _uiFlow.id, item.nodeId, item.key);
+      }
+  
+      alert("Workflow and files saved successfully.");
+    } catch (error) {
+      console.error("Error saving workflow:", error);
+      alert("Failed to save workflow.");
     }
-  }
+  };
+  
 
   const [_isRunningWorkflow, setIsRunningWorkflow] = useState(false);
 
@@ -433,6 +461,7 @@ const Studio = () => {
         data: {
           label: node?.name,
           parameters: node?.parameters,
+          parametersFileUrls: node?.parametersFileUrls,
           type: node?.type,
           input: node?.input,
           output: node?.output
@@ -526,7 +555,6 @@ const Studio = () => {
   }, [nodes, handleDeleteNode]);
 
   const handleTextInputChange = (nodeId, e) => {
-    console.log(e)
     updateNodeParameter(nodeId, "text", e.target.value);
   };
 
@@ -536,6 +564,25 @@ const Studio = () => {
 
   const handleWebResearchPromptChange = (nodeId, e) => {
     updateNodeParameter(nodeId, "prompt", e.target.value);
+  };
+
+  const handleFileSelect = (nodeId: string, key: string, file: File | null)  => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) =>
+        node.id === nodeId
+          ? {
+            ...node,
+            data: {
+              ...node.data,
+              parametersIFormFile: {
+                ...(node.data.parametersIFormFile || {}),
+                [key]: file
+              }
+            }
+          }
+          : node
+      )
+    );
   };
 
   const updateNodeParameter = (nodeId, key, value) => {
@@ -799,7 +846,7 @@ const Studio = () => {
               <div className='w-2/3'>
                 <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{actionRunRun?.createdDate}</span>
               </div>
-              <button  onClick={() => openResultFlow(actionRunRun?.data)} className="w-1/3 focus:outline-none text-black bg-blue-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+              <button onClick={() => openResultFlow(actionRunRun?.data)} className="w-1/3 focus:outline-none text-black bg-blue-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
                 Result
               </button>
               <ResultFlowModal isOpen={showPageResult}
@@ -826,10 +873,33 @@ const Studio = () => {
             <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode?.data?.parameters?.text || ""} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea>
           </div>}
 
-          {_selectedNode?.data?.label == 'Pdf Input' && <div className="mb-5">
-            Pdf Input
-            {/* <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode?.data?.parameters?.text || ""} onChange={(e) => handleTextInputChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Input"></textarea> */}
-          </div>}
+          {_selectedNode?.data?.label === 'Pdf Input' && (
+            <div className="mb-5">
+              <FileUploadTool
+                nodeId={_selectedNode.id}
+                onFileSelect={handleFileSelect}
+              />
+
+              <button
+                onClick={() => {
+                  const hasFileUrl = _selectedNode?.data?.parametersFileUrls?.pdf;
+                  if (hasFileUrl) setShowModalPdfViewer(true);
+                  else alert('PDF not uploaded or missing.');
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md shadow"
+              >
+                Preview
+              </button>
+
+              {showModalPdfViewer && _selectedNode?.data?.parametersFileUrls?.pdf && (
+                <PdfModal
+                  fileUrl={`https://localhost:49153/api/UIFlow/${_selectedNode.data.parametersFileUrls.pdf}`}
+                  onClose={() => setShowModalPdfViewer(false)}
+                />
+              )}
+            </div>
+          )}
+
 
           {_selectedNode?.data?.label == 'LLM Promt' && <div className="mb-5">
             <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>

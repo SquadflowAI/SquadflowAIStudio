@@ -5,7 +5,7 @@ import { ToolDto } from "../dtos/tools/tool-dto";
 import { UIFlowDto } from "../dtos/ui-flow-dto";
 
   export async function getAllToolsAPI(): Promise<ToolDto[]> {
-    const response = await fetch(`https://localhost:49167/api/Tools/all`,
+    const response = await fetch(`https://localhost:49153/api/Tools/all`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -16,7 +16,7 @@ import { UIFlowDto } from "../dtos/ui-flow-dto";
   }
 
   export async function getAllCoreToolsAPI(): Promise<CoreToolDto[]> {
-    const response = await fetch(`https://localhost:49167/api/Tools/all/core`,
+    const response = await fetch(`https://localhost:49153/api/Tools/all/core`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -27,7 +27,7 @@ import { UIFlowDto } from "../dtos/ui-flow-dto";
   }
 
   export async function getAllAIToolsAPI(): Promise<AIToolDto[]> {
-    const response = await fetch(`https://localhost:49167/api/Tools/all/ai`,
+    const response = await fetch(`https://localhost:49153/api/Tools/all/ai`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -38,7 +38,7 @@ import { UIFlowDto } from "../dtos/ui-flow-dto";
   }
 
   export async function getAllAppsAPI(): Promise<AppDto[]> {
-    const response = await fetch(`https://localhost:49167/api/Tools/all/apps`,
+    const response = await fetch(`https://localhost:49153/api/Tools/all/apps`,
     { cache: 'no-store' });
   
     if (!response.ok) {
