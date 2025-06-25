@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
         setUser({ userId: userId });
         setIsAuthenticated(true);
 
-        router.push('/dashboard');
+        router.push('/agent-dashboard');
     };
 
     const authProviderLogout = () => {

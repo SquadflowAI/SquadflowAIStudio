@@ -499,7 +499,7 @@ const Studio = () => {
       setListGroupSelected(false);
       setListGroupNameSelected("");
     } else {
-      router.push(`/dashboard`);
+      router.push(`/agent-dashboard`);
     }
   }
 
@@ -886,7 +886,7 @@ const Studio = () => {
                   if (hasFileUrl) setShowModalPdfViewer(true);
                   else alert('PDF not uploaded or missing.');
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md shadow"
+                className="w-full focus:outline-none text-black bg-slate-400 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
               >
                 Preview
               </button>
