@@ -566,24 +566,48 @@ const Studio = () => {
     updateNodeParameter(nodeId, "prompt", e.target.value);
   };
 
-  const handleFileSelect = (nodeId: string, key: string, file: File | null)  => {
+  // const handleFileSelect = (nodeId: string, key: string, file: File | null)  => {
+  //   setNodes((prevNodes) =>
+  //     prevNodes.map((node) =>
+  //       node.id === nodeId
+  //         ? {
+  //           ...node,
+  //           data: {
+  //             ...node.data,
+  //             parametersIFormFile: {
+  //               ...(node.data.parametersIFormFile || {}),
+  //               [key]: file
+  //             }
+  //           }
+  //         }
+  //         : node
+  //     )
+  //   );
+  // };
+
+  const handleFileSelect = (nodeId: string, key: string, file: File | null) => {
     setNodes((prevNodes) =>
       prevNodes.map((node) =>
         node.id === nodeId
           ? {
-            ...node,
-            data: {
-              ...node.data,
-              parametersIFormFile: {
-                ...(node.data.parametersIFormFile || {}),
-                [key]: file
-              }
+              ...node,
+              data: {
+                ...node.data,
+                parametersIFormFile: {
+                  ...(node.data.parametersIFormFile || {}),
+                  [key]: file,
+                },
+                parameters: {
+                  ...(node.data.parameters || {}),
+                  [`${key}Name`]: file?.name ?? null,
+                },
+              },
             }
-          }
           : node
       )
     );
   };
+  
 
   const updateNodeParameter = (nodeId, key, value) => {
     setNodes((prevNodes) =>
@@ -877,6 +901,7 @@ const Studio = () => {
             <div className="mb-5">
               <FileUploadTool
                 nodeId={_selectedNode.id}
+                fileName={_selectedNode?.data?.parameters?.pdfName}
                 onFileSelect={handleFileSelect}
               />
 

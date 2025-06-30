@@ -13,6 +13,18 @@ export async function createUIFlowAPI(uiFlow: UIFlowDto) {
   return response;
 }
 
+export async function createUIFlowFromTemplateAPI(uiFlow: UIFlowDto, userId, projectId) {
+  const response = await fetch(`https://localhost:49153/api/UIFlow/create-from-template/${userId}/${projectId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(uiFlow),
+  });
+
+  return response;
+}
+
 
 export async function updateUIFlowAPI(uiFlow: UIFlowDto) {
   const response = await fetch('https://localhost:49153/api/UIFlow/update', {
