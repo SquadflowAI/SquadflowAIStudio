@@ -210,6 +210,8 @@ const Studio = () => {
       try {
         const response = await getAllAppsAPI();
         setApps(response);
+
+        toolsRef.current.push(...response);
       } catch (error) {
       } finally {
       }
@@ -340,20 +342,20 @@ const Studio = () => {
 
   const saveWorkflow = async () => {
     if (!_uiFlow) return;
-  
+
     if (!_uiFlow.id) {
       _uiFlow.id = params.id;
     }
-  
+
     _uiFlow.nodes = [];
     _uiFlow.connections = [];
-  
+
     const fileUploadQueue: Array<{
       nodeId: string;
       key: string;
       file: File;
     }> = [];
-  
+
     // Build UIFlow and extract file upload info
     nodes.forEach((element) => {
       const node = new UIAgentNodeDto();
@@ -365,7 +367,7 @@ const Studio = () => {
       node.type = element.data.type;
       node.positionX = element.position.x;
       node.positionY = element.position.y;
-  
+
       // Queue file uploads
       const fileMap = element.data.parametersIFormFile;
       if (fileMap) {
@@ -375,10 +377,10 @@ const Studio = () => {
           }
         });
       }
-  
+
       _uiFlow.nodes.push(node);
     });
-  
+
     // Build connections
     edges.forEach((element) => {
       const edge = new UIAgentNodeConnectionDto();
@@ -386,24 +388,24 @@ const Studio = () => {
       edge.targetNodeId = element.target;
       _uiFlow.connections.push(edge);
     });
-  
+
     console.log("Saving flow:", _uiFlow);
-  
+
     try {
       await updateUIFlowAPI(_uiFlow); // Save flow & nodes first
-  
+
       // Upload files per node
       for (const item of fileUploadQueue) {
         await uploadPdfToNodeAPI(item.file, _uiFlow.id, item.nodeId, item.key);
       }
-  
-      alert("Workflow and files saved successfully.");
+
+      //alert("Workflow and files saved successfully.");
     } catch (error) {
       console.error("Error saving workflow:", error);
-      alert("Failed to save workflow.");
+      //alert("Failed to save workflow.");
     }
   };
-  
+
 
   const [_isRunningWorkflow, setIsRunningWorkflow] = useState(false);
 
@@ -566,6 +568,19 @@ const Studio = () => {
     updateNodeParameter(nodeId, "prompt", e.target.value);
   };
 
+  const handleGmailReceiverSenderChange = (nodeId, e) => {
+    updateNodeParameter(nodeId, "appGmailReceiverSender", e.target.value);
+  };
+
+  const handleGmailReceiverIncludeAttachmentsChange = (nodeId, e) => {
+    //var bool = e.target.checked as string;
+    updateNodeParameter(nodeId, "appGmailReceiverIncludeAttachments", e.target.checked.toString());
+  };
+
+  const handleGmailReceiverNumberOfReadedEmailsChange = (nodeId, e) => {
+    updateNodeParameter(nodeId, "appGmailNumberOfReadedEmails", e.target.value);
+  };
+
   // const handleFileSelect = (nodeId: string, key: string, file: File | null)  => {
   //   setNodes((prevNodes) =>
   //     prevNodes.map((node) =>
@@ -590,24 +605,24 @@ const Studio = () => {
       prevNodes.map((node) =>
         node.id === nodeId
           ? {
-              ...node,
-              data: {
-                ...node.data,
-                parametersIFormFile: {
-                  ...(node.data.parametersIFormFile || {}),
-                  [key]: file,
-                },
-                parameters: {
-                  ...(node.data.parameters || {}),
-                  [`${key}Name`]: file?.name ?? null,
-                },
+            ...node,
+            data: {
+              ...node.data,
+              parametersIFormFile: {
+                ...(node.data.parametersIFormFile || {}),
+                [key]: file,
               },
-            }
+              parameters: {
+                ...(node.data.parameters || {}),
+                [`${key}Name`]: file?.name ?? null,
+              },
+            },
+          }
           : node
       )
     );
   };
-  
+
 
   const updateNodeParameter = (nodeId, key, value) => {
     setNodes((prevNodes) =>
@@ -786,8 +801,10 @@ const Studio = () => {
           <div className='flex-col flex'>
             {_apps?.map((tool, index) => (
               <div className="flex flex-row">
+
                 <button type="button" onDragStart={(event) => onDragStart(event, tool?.name)} draggable
-                  className="w-full focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  className="w-full flex justify-center items-center focus:outline-none text-black bg-slate-300 hover:bg-slate-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+                  {tool?.name == "Gmail" && <img src="../../gmail.png" className="h-3 mr-3"></img>}
                   {tool?.name}</button>
               </div>
             ))}
@@ -918,13 +935,50 @@ const Studio = () => {
 
               {showModalPdfViewer && _selectedNode?.data?.parametersFileUrls?.pdf && (
                 <PdfModal
-                  fileUrl={`https://localhost:49153/api/UIFlow/${_selectedNode.data.parametersFileUrls.pdf}`}
+                  fileUrl={`https://localhost:49155/api/UIFlow/${_selectedNode.data.parametersFileUrls.pdf}`}
                   onClose={() => setShowModalPdfViewer(false)}
                 />
               )}
             </div>
           )}
 
+          {_selectedNode?.data?.label === 'Gmail' && (
+            <div className="mb-5">
+              <label className="block mb-2 mt-2 text-sm font-medium text-gray-900 dark:text-white">Sender</label>
+              <input
+                key={_selectedNode.id}
+                value={_selectedNode.data?.parameters?.appGmailReceiverSender || ""}
+                onChange={(e) => handleGmailReceiverSenderChange(_selectedNode.id, e)}
+                type="text"
+                placeholder="Sender"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </input>
+
+              <label className="mt-2 inline-flex items-center cursor-pointer">
+                <input
+                   
+                  checked={_selectedNode.data?.parameters?.appGmailReceiverIncludeAttachments === 'true' || false}
+                  onChange={(e) => handleGmailReceiverIncludeAttachmentsChange(_selectedNode.id, e)}
+                  type="checkbox"
+                  className="sr-only peer"
+                />
+                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Include Attachments</span>
+              </label>
+
+
+              <label className="block mb-2 mt-2 text-sm font-medium text-gray-900 dark:text-white">Number of readed emails</label>
+              <input
+                key={_selectedNode.id}
+                value={_selectedNode.data?.parameters?.appGmailNumberOfReadedEmails || ""}
+                onChange={(e) => handleGmailReceiverNumberOfReadedEmailsChange(_selectedNode.id, e)}
+                type="number"
+                placeholder="Number of emails"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </input>
+
+            </div>
+          )}
 
           {_selectedNode?.data?.label == 'LLM Promt' && <div className="mb-5">
             <textarea id="message" key={_selectedNode.id} rows="4" value={_selectedNode.data?.parameters?.prompt || ""} onChange={(e) => handleLLMPromptChange(_selectedNode.id, e)} className="mt-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt"></textarea>
