@@ -87,9 +87,11 @@ export default function PageLayout() {
 
         {/* Right Panel */}
         <div className="w-full md:w-2/3 flex flex-col bg-gray-50 p-6 overflow-auto">
-          <p className="text-sm text-gray-500 text-center">
-            This is the preview area. It will update based on what you describe.
-          </p>
+          <iframe
+            src={`https://localhost:44380/api/Preview/d5124209-c71e-4195-a854-2911484e7a9f`}
+            className="w-full h-[800px] border-0"
+            title="User App Preview"
+          />
         </div>
       </div>
     </div>
