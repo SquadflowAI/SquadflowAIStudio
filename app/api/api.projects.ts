@@ -1,8 +1,9 @@
+import { API_BASE_URL } from "../constants";
 import { ProjectDto } from "../dtos/project-dto";
 
 export async function createProjectAPI(project: ProjectDto) {
  
-    const response = await fetch('https://localhost:49155/api/Projects/create', {
+    const response = await fetch(`${API_BASE_URL}/Projects/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,7 +16,7 @@ export async function createProjectAPI(project: ProjectDto) {
 }
 
 export async function getProjectAPI(name: string): Promise<ProjectDto> {
-    const response = await fetch(`https://localhost:49155/api/Projects/${name}`,
+    const response = await fetch(`${API_BASE_URL}/Projects/${name}`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -27,7 +28,7 @@ export async function getProjectAPI(name: string): Promise<ProjectDto> {
   }
 
   export async function getAllProjectsAPI(): Promise<ProjectDto[]> {
-    const response = await fetch(`https://localhost:49155/api/Projects/all`,
+    const response = await fetch(`${API_BASE_URL}/Projects/all`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -39,7 +40,7 @@ export async function getProjectAPI(name: string): Promise<ProjectDto> {
   }
 
   export async function getAllProjectsByUserIdAPI(userId: string): Promise<ProjectDto[]> {
-    const response = await fetch(`https://localhost:49155/api/Projects/user-id/${userId}`,
+    const response = await fetch(`${API_BASE_URL}/Projects/user-id/${userId}`,
     { cache: 'no-store' });
   
     if (!response.ok) {

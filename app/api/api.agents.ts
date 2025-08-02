@@ -1,7 +1,8 @@
+import { API_BASE_URL } from "../constants";
 import { AgentDto } from "../dtos/agent-dto";
 
 export async function getAllAgentsAPI(): Promise<AgentDto[]> {
-    const response = await fetch(`https://localhost:49155/api/Agent/all`,
+    const response = await fetch(`${API_BASE_URL}/Agent/all`,
     { cache: 'no-store' });
   
     if (!response.ok) {

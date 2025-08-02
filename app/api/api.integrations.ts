@@ -1,8 +1,9 @@
+import { API_BASE_URL } from "../constants";
 import IntegrationDto from "../dtos/integration-dto";
 
 export async function createIntegrationAPI(integration: IntegrationDto) {
 
-    const response = await fetch('https://localhost:49155/api/Integrations/create-integration', {
+    const response = await fetch(`${API_BASE_URL}/Integrations/create-integration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -14,7 +15,7 @@ export async function createIntegrationAPI(integration: IntegrationDto) {
 }
 
 export async function getAllIntegrationsByUserIdAPI(userId: string): Promise<IntegrationDto> {
-  const response = await fetch(`https://localhost:49155/api/Integrations/user-id/${userId}`,
+  const response = await fetch(`${API_BASE_URL}/Integrations/user-id/${userId}`,
   { cache: 'no-store' });
 
   if (!response.ok) {

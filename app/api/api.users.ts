@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../constants";
 import { CreateUserDto } from "../dtos/create-user-dto";
 import { LoginRequestDto } from "../dtos/login-request-dto";
 import { LoginResponseDto } from "../dtos/login-response-dto";
@@ -5,7 +6,7 @@ import { UserDto } from "../dtos/user-dto";
 
 export async function createUserAPI(user: CreateUserDto) {
 
-    const response = await fetch('https://localhost:49155/api/User/create-user', {
+    const response = await fetch(`${API_BASE_URL}/User/create-user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -17,7 +18,7 @@ export async function createUserAPI(user: CreateUserDto) {
 }
 
 export async function getUserByIdAPI(id: string): Promise<UserDto> {
-    const response = await fetch(`https://localhost:49155/api/User/${id}`,
+    const response = await fetch(`${API_BASE_URL}/User/${id}`,
     { cache: 'no-store' });
   
     if (!response.ok) {
@@ -30,7 +31,7 @@ export async function getUserByIdAPI(id: string): Promise<UserDto> {
 
   export async function loginAPI(loginRequest: LoginRequestDto): Promise<LoginResponseDto>  {
 
-    const response = await fetch('https://localhost:49155/api/User/login', {
+    const response = await fetch(`${API_BASE_URL}/User/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

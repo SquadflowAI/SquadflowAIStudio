@@ -24,6 +24,7 @@ import CustomNode from '../custom-node';
 import ResultFlowModal from '../result-flow-modal';
 import FileUploadTool from '../file-upload-tool';
 import PdfModal from '../pdf-viewer';
+//const PdfModal = dynamic(() => import('../pdf-viewer'), { ssr: false });
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
 

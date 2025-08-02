@@ -1,7 +1,8 @@
+import { API_BASE_URL } from "../constants";
 import { FlowTemplateDto } from "../dtos/flow-template-dto";
 
 export async function getAllFlowTemplatesAPI(): Promise<FlowTemplateDto[]> {
-    const response = await fetch(`https://localhost:49155/api/FlowTemplates`,
+    const response = await fetch(`${API_BASE_URL}/FlowTemplates`,
     { cache: 'no-store' });
   
     if (!response.ok) {
