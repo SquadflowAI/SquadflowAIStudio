@@ -17,6 +17,7 @@ const CreateDataModal = ({ isOpen, onClose, onAdd }) => {
     const handleAdd = () => {
         if (_file) {
             uploadDataFileAPI(_file, projectInMemory?.id)
+            onAdd(_file);
             onClose(); // Close the modal after adding
         }
 

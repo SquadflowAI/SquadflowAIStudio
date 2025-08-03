@@ -25,11 +25,16 @@ export default function PdfModal({ fileUrl, onClose }: PdfModalProps) {
         <div className="h-full">
           <iframe
             src={fileUrl}
+            title="Document Preview"
+            className="w-full h-full"
+          />
+          {/* <iframe
+            src={fileUrl}
             width="100%"
             height="90vh"
             style={{ border: 'none' }}
             title="PDF Viewer"
-          />
+          /> */}
           {/* <Worker workerUrl="/pdf.worker.min.js">                
             <Viewer fileUrl={fileUrl} />
           </Worker> */}

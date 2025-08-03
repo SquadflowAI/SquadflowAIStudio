@@ -6,7 +6,9 @@ import CreateFlowModal from "./create-flow-modal";
 import { useRouter } from "@/node_modules/next/navigation";
 import { useAuth } from "../contexts/AuthProvider";
 import CreateDataModal from "./create-data-modal";
-import { getDataByProjectIdAPI } from "../api/api.data";
+import { deleteDataFileByIdAPI, getDataByProjectIdAPI } from "../api/api.data";
+import PdfModal from "../studio/pdf-viewer";
+import { API_BASE_URL } from "../constants";
 
 export default function DataTable() {
     const [_data, setData] = useState([]);
@@ -16,21 +18,17 @@ export default function DataTable() {
     const router = useRouter();
     const { user } = useAuth();
 
+    const [showModalPdfViewer, setShowModalPdfViewer] = useState(false);
+
     const openCreateData = () => {
         setShowCreateData(true)
-    }
-
-    const deleteData = (id: any) => {
-        let deletedData = _data.filter(x => x.id !== id);
-        setData(deletedData);
-        deleteUIFlowByIdAPI(id)
     }
 
     useEffect(() => {
         async function getData() {
             try {
-              const response = await getDataByProjectIdAPI(projectInMemory?.id);
-              setData(response);
+                const response = await getDataByProjectIdAPI(projectInMemory?.id);
+                setData(response);
             } catch (error) {
                 console.log(error)
             } finally {
@@ -39,13 +37,18 @@ export default function DataTable() {
         getData();
     }, []);
 
-    const createData = async (name) => {
-
-
+    const createData = async (file) => {
+        setData((data) => [...data, file])
     };
 
-    const openPreview = (id) => {
-   
+    const openPreview = () => {
+        setShowModalPdfViewer(true)
+    }
+
+    const deleteDataFile = (id: any) => {
+        let deletedFlow = _data.filter(x => x.id !== id);
+        setData(deletedFlow);
+        deleteDataFileByIdAPI(id)
     }
 
     return (
@@ -86,9 +89,9 @@ export default function DataTable() {
                         <tbody>
                             {_data.map((row) => (
                                 <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {row.name}
-                                    </th>
+                                    <td className="px-6 py-4 flex-row flex items-center font-medium text-gray-900">
+                                        <img src="../../pdf.svg" className="h-7 mr-3"></img><div className="">{row.name}</div>
+                                    </td>
                                     <td className="px-6 py-4">
                                         -
                                     </td>
@@ -96,10 +99,16 @@ export default function DataTable() {
                                         -
                                     </td>
                                     <td className="px-6 py-4   ">
-                                        <button onClick={() => openPreview(row.id)} className="ml-auto cursor-pointer  p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">Preview</button>
+                                        <button onClick={() => openPreview()} className="ml-auto cursor-pointer  p-2 focus:outline-none text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:ring-slate-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-900">Preview</button>
+                                        {showModalPdfViewer && row.id && (
+                                            <PdfModal
+                                                fileUrl={`${API_BASE_URL}/UIFlow/documents/download/${row.id}`}
+                                                onClose={() => setShowModalPdfViewer(false)}
+                                            />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4  ">
-                                        <div onClick={() => deleteData(row.id)}>
+                                        <div onClick={() => deleteDataFile(row.id)}>
                                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M4 7H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

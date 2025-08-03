@@ -24,6 +24,7 @@ import CustomNode from '../custom-node';
 import ResultFlowModal from '../result-flow-modal';
 import FileUploadTool from '../file-upload-tool';
 import PdfModal from '../pdf-viewer';
+import { API_BASE_URL } from '@/app/constants';
 //const PdfModal = dynamic(() => import('../pdf-viewer'), { ssr: false });
 // import AiChat from '../ui/ai-chat';
 // import { getAvailableRoutes } from '../lib/api.uiworkflows';
@@ -936,7 +937,7 @@ const Studio = () => {
 
               {showModalPdfViewer && _selectedNode?.data?.parametersFileUrls?.pdf && (
                 <PdfModal
-                  fileUrl={`https://localhost:49155/api/UIFlow/${_selectedNode.data.parametersFileUrls.pdf}`}
+                  fileUrl={`${API_BASE_URL}/UIFlow/${_selectedNode.data.parametersFileUrls.pdf}`}
                   onClose={() => setShowModalPdfViewer(false)}
                 />
               )}
