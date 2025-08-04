@@ -15,11 +15,56 @@ export default function PageLayout() {
     }
   }, [input]);
 
-  const handleSend = () => {
+  useEffect(() => {
+    const userId = "c5386574-99d0-47a7-bba4-86efa42d6456"; // Replace with real user ID
+    const events = new EventSource(`${API_VIBE_CODE_BASE_URL}/Preview/build-events/${userId}`);
+
+    events.onmessage = (event) => {
+      const msg = event.data;
+      console.log("Build status:", msg);
+      setMessages((prev) => [...prev, msg]);
+    };
+
+    events.onerror = (err) => {
+      console.error("SSE connection error:", err);
+      events.close();
+    };
+
+    return () => {
+      events.close();
+    };
+  }, []);
+
+  const handleSend = async () => {
     if (!input.trim()) return;
-    setMessages((prev) => [...prev, input]);
+
+    const userId = "c5386574-99d0-47a7-bba4-86efa42d6456"; // Make dynamic if needed
+
+    setMessages((prev) => [...prev, `🧠 ${input}`]); // optional: show input as a message
     setInput('');
+
+    try {
+      const res = await fetch(`${API_VIBE_CODE_BASE_URL}/Preview/build-or-update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, prompt: input }),
+      });
+
+      if (!res.ok) {
+        const errorMsg = await res.text();
+        setMessages((prev) => [...prev, `❌ Error: ${errorMsg}`]);
+        return;
+      }
+
+      const resultMsg = await res.text();
+      setMessages((prev) => [...prev, `✅ ${resultMsg}`]);
+    } catch (err: any) {
+      setMessages((prev) => [...prev, `❌ Network error: ${err.message}`]);
+    }
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -89,7 +134,7 @@ export default function PageLayout() {
         {/* Right Panel */}
         <div className="w-full md:w-2/3 flex flex-col bg-gray-50 p-6 overflow-auto">
           <iframe
-            src={`${API_VIBE_CODE_BASE_URL}/Preview/d5124209-c71e-4195-a854-2911484e7a9f`}
+            src={`${API_VIBE_CODE_BASE_URL}/Preview/c5386574-99d0-47a7-bba4-86efa42d6456`}
             className="w-full h-[800px] border-0"
             title="User App Preview"
           />
