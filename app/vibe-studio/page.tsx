@@ -7,6 +7,7 @@ export default function PageLayout() {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const userId = "c5386574-99d0-47a7-bba4-86efa42d6456";
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -16,7 +17,6 @@ export default function PageLayout() {
   }, [input]);
 
   useEffect(() => {
-    const userId = "c5386574-99d0-47a7-bba4-86efa42d6456"; // Replace with real user ID
     const events = new EventSource(`${API_VIBE_CODE_BASE_URL}/Preview/build-events/${userId}`);
 
     events.onmessage = (event) => {
@@ -38,7 +38,7 @@ export default function PageLayout() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userId = "c5386574-99d0-47a7-bba4-86efa42d6456"; // Make dynamic if needed
+     // Make dynamic if needed
 
     setMessages((prev) => [...prev, `🧠 ${input}`]); // optional: show input as a message
     setInput('');
@@ -65,6 +65,15 @@ export default function PageLayout() {
     }
   };
 
+  const restart = async () => {
+    await fetch(`${API_VIBE_CODE_BASE_URL}/Preview/upload-template/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+  }
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -83,6 +92,9 @@ export default function PageLayout() {
           </button>
           <button className="text-sm font-medium px-3 py-1.5 rounded-md bg-gray-200 hover:bg-gray-300 transition">
             Workspace
+          </button>
+          <button onClick={() => restart()} className="text-sm font-medium px-3 py-1.5 rounded-md bg-black text-white hover:bg-gray-900 transition">
+            Restart
           </button>
         </div>
         <div className="flex gap-2">
