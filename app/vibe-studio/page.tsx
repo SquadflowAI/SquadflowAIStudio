@@ -4,10 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import { API_VIBE_CODE_BASE_URL } from '../constants';
 
 export default function PageLayout() {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const userId = "c5386574-99d0-47a7-bba4-86efa42d6456";
+
+  type Message = {
+    type: 'build-event' | 'user' | 'system' | 'error';
+    content: string;
+  };
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -22,7 +27,7 @@ export default function PageLayout() {
     events.onmessage = (event) => {
       const msg = event.data;
       console.log("Build status:", msg);
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => [...prev, { type: 'build-event', content: msg }]);
     };
 
     events.onerror = (err) => {
@@ -38,9 +43,9 @@ export default function PageLayout() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-     // Make dynamic if needed
+    // Make dynamic if needed
 
-    setMessages((prev) => [...prev, `🧠 ${input}`]); // optional: show input as a message
+    setMessages((prev) => [...prev, { type: 'user', content: `🧠 ${input}` }]); // optional: show input as a message
     setInput('');
 
     try {
@@ -54,14 +59,14 @@ export default function PageLayout() {
 
       if (!res.ok) {
         const errorMsg = await res.text();
-        setMessages((prev) => [...prev, `❌ Error: ${errorMsg}`]);
+        setMessages((prev) => [...prev, { type: 'error', content: `❌ Error: ${errorMsg}` }]);
         return;
       }
 
       const resultMsg = await res.text();
-      setMessages((prev) => [...prev, `✅ ${resultMsg}`]);
+      setMessages((prev) => [...prev, { type: 'system', content: `✅ ${resultMsg}` }]);
     } catch (err: any) {
-      setMessages((prev) => [...prev, `❌ Network error: ${err.message}`]);
+      setMessages((prev) => [...prev, { type: 'error', content: `❌ Network error: ${err.message}` }]);
     }
   };
 
@@ -114,11 +119,19 @@ export default function PageLayout() {
           <h2 className="text-lg font-semibold mb-4">Describe what you want to build</h2>
 
           <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-            {messages.map((msg, idx) => (
-              <div key={idx} className="bg-gray-200 text-sm p-2 rounded-md text-gray-800">
-                {msg}
-              </div>
-            ))}
+            {messages.map((msg, idx) => {
+              let bgColor = 'bg-gray-200';
+              if (msg.type === 'build-event') bgColor = 'bg-yellow-100 italic';
+              if (msg.type === 'user') bgColor = 'bg-blue-100';
+              if (msg.type === 'system') bgColor = 'bg-green-100';
+              if (msg.type === 'error') bgColor = 'bg-red-100 italic';
+
+              return (
+                <div key={idx} className={`${bgColor} text-sm p-2 rounded-md text-gray-800`}>
+                  {msg.content}
+                </div>
+              );
+            })}
           </div>
 
           <div className="border border-gray-300 rounded-2xl p-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-100">
